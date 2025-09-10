@@ -1,0 +1,16 @@
+[[tools.deno]]
+version = "2.4.5"
+backend = "core:deno"
+
+[[tools.hk]]
+version = "1.10.7"
+backend = "aqua:jdx/hk"
+
+[tools.hk.platforms.macos-arm64]
+checksum = "blake3:2990ec4745178df124c26dcef643a14d362fe8ca24759feba4bdf61e71bf4a63"
+size = 5928348
+url = "https://github.com/jdx/hk/releases/download/v1.10.7/hk-aarch64-apple-darwin.tar.gz"
+
+[[tools."npm:dprint"]]
+version = "0.50.1"
+backend = "npm:dprint"

@@ -1,0 +1,30 @@
+amends "package://github.com/jdx/hk/releases/download/v1.2.0/hk@1.2.0#/Config.pkl"
+
+hooks {
+    ["pre-commit"] {
+        fix = true
+        steps {
+            ["bench"] {
+                glob = List("*_bench.ts")
+                check = "deno task bench"
+            }
+            ["check"] {
+                glob = List("*.ts")
+                check = "deno check"
+            }
+            ["fmt"] {
+                check = "deno task fmt --check {{files}}"
+                fix = "deno task fmt {{files}}"
+            }
+            ["test"] {
+                glob = List("*_test.ts")
+                check = "deno task test"
+            }
+            ["test:e2e"] {
+                glob = List("*.ts")
+                check = "deno task test:e2e --project=firefox"
+                // profiles = List("slow")
+            }
+        }
+    }
+}
