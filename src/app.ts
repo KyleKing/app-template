@@ -8,7 +8,6 @@ import { renderTemplate } from "@/templates/engine.ts"
 import { renderPage } from "@/templates/helpers.ts"
 import { handleApiError } from "@/utils/errorHandler.ts"
 import { getEnvConfig } from "@/utils/env.ts"
-import path from "node:path"
 
 const __dirname = dirname(new URL(import.meta.url).pathname)
 const publicRoot = join(__dirname, "../../public")
@@ -95,45 +94,17 @@ app.get(
   serveStatic({
     getContent: async (pth) => {
       try {
-        const cleanPath = path.join("./public", path.basename(pth))
-        const content = await Deno.readFile(cleanPath)
-        return new Response(content)
-      } catch {
+        return await Deno.readFile(pth)
+      } catch (error) {
+        const err = error as Error
+        console.error(`Error Downloading File: ${err.message}\n${err.stack}`)
         return null
       }
     },
-    precompressed: true,
-    root: "./public",
+    // PLANNED: Revisit support of compression: https://docs.deno.com/deploy/api/compression
+    // precompressed: true,
+    root: "./",
   }),
 )
-// app.get("/public/*", async (c) => {
-//   try {
-//     const filePath = `.${c.req.path}`
-//     const content = await Deno.readFile(filePath)
-//
-//     const ext = filePath.split(".").pop()?.toLowerCase()
-//     let contentType = "application/octet-stream"
-//     switch (ext) {
-//       case "js":
-//       case "mjs":
-//         contentType = "text/javascript"
-//         break
-//       case "css":
-//         contentType = "text/css"
-//         break
-//       case "json":
-//       case "map":
-//         contentType = "application/json"
-//         break
-//       case "svg":
-//         contentType = "image/svg+xml"
-//         break
-//     }
-//
-//     return c.body(content, 200, { "Content-Type": contentType })
-//   } catch (_error) {
-//     return c.text("File not found", 404)
-//   }
-// })
 
 export { app }
