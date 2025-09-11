@@ -1,0 +1,8 @@
+<li class="comment" data-id="{{ comment.id }}">
+  <div class="comment__meta">
+    {{ comment.author }} <span class="comment__time" title="{{ comment.createdAt.toISOString() }}">{{
+      comment.createdAt.toLocaleTimeString()
+    }}</span>
+  </div>
+  <div class="comment__body">{{ comment.body }}</div>
+</li>

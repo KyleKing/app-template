@@ -1,0 +1,74 @@
+<h1 class="main__title">Comments</h1>
+<p class="main__content">
+  Demo of an optimistic comment form using HTMX. Submit a comment and it appears immediately before being replaced when
+  the server returns the updated HTML
+</p>
+
+<section class="comments" id="comments-demo">
+  <form
+    id="comment-form"
+    class="comment-form"
+    hx-post="/partials/comments"
+    hx-target="#comments-list"
+    hx-swap="afterbegin"
+    hx-on::before-request="optimisticComment(this)"
+    hx-on::after-request="clearForm(this)"
+  >
+    <fieldset>
+      <legend>Add Comment</legend>
+      <div class="field-row">
+        <label for="author">Author Name</label>
+        <input id="author" name="author" required maxlength="32" autocomplete="name" />
+      </div>
+      <div class="field-row">
+        <label for="body">Comment</label>
+        <textarea id="body" name="body" required rows="3" maxlength="280" placeholder="Share your thoughts"></textarea>
+      </div>
+      <button type="submit">Post</button>
+    </fieldset>
+  </form>
+
+  <ol id="comments-list" class="comments__list" hx-get="/partials/comments" hx-trigger="load" hx-swap="innerHTML"></ol>
+</section>
+
+<script>
+  function clearForm(form) {
+    form.reset()
+  }
+
+  function escapeHtml(str) {
+    // Doesn't need to be perfect because this is only local
+    return str.replace(/[&<>"]+/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] || c))
+  }
+  function optimisticComment(form) {
+    const fd = new FormData(form)
+    const author = (fd.get("author") || "").toString().trim()
+    const body = (fd.get("body") || "").toString().trim()
+    if (!body) return
+    const tempId = "temp-" + crypto.randomUUID()
+    const li = document.createElement("li")
+    li.id = tempId
+    li.className = "comment comment--optimistic"
+    li.innerHTML = `<div class="comment__meta">
+        ${escapeHtml(author)} <span class="comment__time" data-rel="just now">(sending…)</span>
+    </div>
+    <div class="comment__body">${escapeHtml(body)}</div>`
+    const list = document.querySelector("#comments-list")
+    if (list) {
+      list.prepend(li)
+    }
+  }
+
+  // Reconcile and remove optimistic entries
+  document.body.addEventListener("htmx:afterSwap", (e) => {
+    if (!e.detail.target || e.detail.target.id !== "comments-list") return
+
+    const realBodies = Array.from(e.detail.target.querySelectorAll(".comment[data-id] .comment__body")).map((n) =>
+      n.textContent?.trim() || ""
+    )
+    document.querySelectorAll(".comment--optimistic").forEach((node) => {
+      const body = node.querySelector(".comment__body")?.textContent?.trim() || ""
+      if (realBodies.includes(body)) node.remove()
+    })
+  })
+</script>

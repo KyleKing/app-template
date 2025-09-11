@@ -5,6 +5,7 @@ import { AsyncLocalStorage } from "node:async_hooks"
 import { dirname, join } from "node:path"
 import { api } from "@/api.ts"
 import { renderTemplate } from "@/templates/engine.ts"
+import { commentsRouter } from "@/partials/commentsRouter.ts"
 import { renderPage } from "@/templates/helpers.ts"
 import { handleApiError } from "@/utils/errorHandler.ts"
 import { getEnvConfig } from "@/utils/env.ts"
@@ -77,6 +78,15 @@ app.onError((err, c) => {
 })
 
 app.route("/iapi", api)
+app.route("/partials", commentsRouter)
+
+app.get("/comments", async (c) => {
+  try {
+    return await renderPage("pages/comments.vto", {}, "Comments", c)
+  } catch (error) {
+    return handleApiError(error, c, { message: "Error rendering comments page", responseType: "html" })
+  }
+})
 
 app.get("/:name?", async (c) => {
   try {
