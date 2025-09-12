@@ -1,5 +1,4 @@
-import { copy } from "node:fs/promises"
-import { join } from "node:path"
+import { join } from "@std/path"
 import { transpile } from "@x/emit/mod.ts"
 
 const clientFiles = ["commentShape.ts"]

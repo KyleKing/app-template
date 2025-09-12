@@ -2,7 +2,7 @@ import { configure, getConsoleSink, getLogger, withContext } from "@logtape/logt
 import { Hono } from "hono"
 import { serveStatic } from "hono/deno"
 import { AsyncLocalStorage } from "node:async_hooks"
-import { dirname, join } from "node:path"
+import { dirname, join } from "@std/path"
 import { api } from "@/api.ts"
 import { renderTemplate } from "@/templates/engine.ts"
 import { commentsRouter } from "@/partials/commentsRouter.ts"
