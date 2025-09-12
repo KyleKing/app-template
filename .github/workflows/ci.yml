@@ -21,7 +21,9 @@ jobs:
           deno-version: v2.x
 
       - name: Install dependencies
-        run: deno install
+        run: |
+          deno install
+          deno task build:shared
 
       - name: Run Tests
         run: deno task test

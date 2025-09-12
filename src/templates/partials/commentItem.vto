@@ -1,8 +1,10 @@
 <li class="comment" data-id="{{ comment.id }}">
   <div class="comment__meta">
-    {{ comment.author }} <span class="comment__time" title="{{ comment.createdAt.toISOString() }}">{{
-      comment.createdAt.toLocaleTimeString()
-    }}</span>
+    <span data-field="author">{{ comment.author }}</span> <span
+      class="comment__time"
+      data-field="time"
+      title="{{> if (comment.createdAt) { comment.createdAt.toISOString() } }}"
+    >{{> if (comment.createdAt) comment.createdAt.toLocaleTimeString() }}</span>
   </div>
-  <div class="comment__body">{{ comment.body }}</div>
+  <div class="comment__body" data-field="body">{{ comment.body }}</div>
 </li>

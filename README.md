@@ -13,7 +13,7 @@ hk install
 ## Development
 
 ```sh
-deno task dev # Run locally and watch changes (but FYI not on .vto files)
+deno task dev # Run locally and watch changes (but FYI not on .vto files nor watches ts>js build step)
 
 hk run pre-commit --all
 

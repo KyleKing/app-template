@@ -148,5 +148,5 @@ dist
 # Custom
 
 ## Playwright
-playwright-report/index.html
-test-results/.last-run.json
+playwright-report/*
+test-results/*

@@ -1,6 +1,6 @@
 import { configure, getConsoleSink, getLogger, withContext } from "@logtape/logtape"
 import { Hono } from "hono"
-import { serveStatic } from "hono/serve-static"
+import { serveStatic } from "hono/deno"
 import { AsyncLocalStorage } from "node:async_hooks"
 import { dirname, join } from "node:path"
 import { api } from "@/api.ts"
@@ -9,6 +9,7 @@ import { commentsRouter } from "@/partials/commentsRouter.ts"
 import { renderPage } from "@/templates/helpers.ts"
 import { handleApiError } from "@/utils/errorHandler.ts"
 import { getEnvConfig } from "@/utils/env.ts"
+import { MAX_AUTHOR_LEN, MAX_BODY_LEN } from "~/commentShape.ts"
 
 const __dirname = dirname(new URL(import.meta.url).pathname)
 const publicRoot = join(__dirname, "../../public")
@@ -82,7 +83,7 @@ app.route("/partials", commentsRouter)
 
 app.get("/comments", async (c) => {
   try {
-    return await renderPage("pages/comments.vto", {}, "Comments", c)
+    return await renderPage("pages/comments.vto", { MAX_AUTHOR_LEN, MAX_BODY_LEN }, "Comments", c)
   } catch (error) {
     return handleApiError(error, c, { message: "Error rendering comments page", responseType: "html" })
   }
@@ -102,15 +103,6 @@ app.get("/:name?", async (c) => {
 app.get(
   "/public/*",
   serveStatic({
-    getContent: async (pth) => {
-      try {
-        return await Deno.readFile(pth)
-      } catch (error) {
-        const err = error as Error
-        console.error(`Error Downloading File: ${err.message}\n${err.stack}`)
-        return null
-      }
-    },
     // PLANNED: Revisit support of compression: https://docs.deno.com/deploy/api/compression
     // precompressed: true,
     root: "./",

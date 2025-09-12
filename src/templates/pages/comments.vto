@@ -18,57 +18,71 @@
       <legend>Add Comment</legend>
       <div class="field-row">
         <label for="author">Author Name</label>
-        <input id="author" name="author" required maxlength="32" autocomplete="name" />
+        <input id="author" name="author" required maxlength="{{ MAX_AUTHOR_LEN }}" autocomplete="name" />
       </div>
       <div class="field-row">
         <label for="body">Comment</label>
-        <textarea id="body" name="body" required rows="3" maxlength="280" placeholder="Share your thoughts"></textarea>
+        <textarea
+          id="body"
+          name="body"
+          required
+          rows="3"
+          maxlength="{{ MAX_BODY_LEN }}"
+          placeholder="Share your thoughts"
+        ></textarea>
       </div>
+      <input type="hidden" name="tempId" />
       <button type="submit">Post</button>
     </fieldset>
   </form>
 
   <ol id="comments-list" class="comments__list" hx-get="/partials/comments" hx-trigger="load" hx-swap="innerHTML"></ol>
+
+  <template id="comment-item-template">
+    {{ include "../partials/commentItem.vto" { comment: { id: "", author: "", createdAt: "", body: "" } } |> safe }}
+  </template>
 </section>
 
-<script>
-  function clearForm(form) {
+<script type="module" src="./public/shared/commentShape.js"></script>
+<script type="module">
+  import { escapeHtml, generateTempId, shapeCommentInput } from "./public/shared/commentShape.js"
+
+  window.clearForm = function clearForm(form) {
     form.reset()
   }
 
-  function escapeHtml(str) {
-    // Doesn't need to be perfect because this is only local
-    return str.replace(/[&<>"]+/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c] || c))
-  }
-  function optimisticComment(form) {
+  window.optimisticComment = function optimisticComment(form) {
     const fd = new FormData(form)
-    const author = (fd.get("author") || "").toString().trim()
-    const body = (fd.get("body") || "").toString().trim()
-    if (!body) return
-    const tempId = "temp-" + crypto.randomUUID()
-    const li = document.createElement("li")
-    li.id = tempId
-    li.className = "comment comment--optimistic"
-    li.innerHTML = `<div class="comment__meta">
-        ${escapeHtml(author)} <span class="comment__time" data-rel="just now">(sending…)</span>
-    </div>
-    <div class="comment__body">${escapeHtml(body)}</div>`
-    const list = document.querySelector("#comments-list")
+    const shaped = shapeCommentInput(fd)
+    if (!shaped.body) return
+
+    const tempId = generateTempId()
+    const hidden = form.querySelector('input[name="tempId"]')
+    if (hidden) hidden.value = tempId
+
+    const tpl = document.getElementById("comment-item-template")
+    if (!tpl) return
+
+    const list = document.getElementById("comments-list")
     if (list) {
-      list.prepend(li)
+      const node = tpl.content.firstElementChild.cloneNode(true)
+      node.classList.add("comment--optimistic")
+      node.setAttribute("data-temp-id", tempId)
+      node.querySelector('[data-field="author"]').textContent = escapeHtml(shaped.author)
+      node.querySelector('[data-field="time"]').textContent = "(sending…)"
+      node.querySelector('[data-field="body"]').textContent = escapeHtml(shaped.body)
+      list.prepend(node)
     }
   }
 
-  // Reconcile and remove optimistic entries
-  document.body.addEventListener("htmx:afterSwap", (e) => {
-    if (!e.detail.target || e.detail.target.id !== "comments-list") return
-
-    const realBodies = Array.from(e.detail.target.querySelectorAll(".comment[data-id] .comment__body")).map((n) =>
-      n.textContent?.trim() || ""
-    )
-    document.querySelectorAll(".comment--optimistic").forEach((node) => {
-      const body = node.querySelector(".comment__body")?.textContent?.trim() || ""
-      if (realBodies.includes(body)) node.remove()
+  document.body.addEventListener("htmx:afterSwap", (event) => {
+    if (!event.detail.target || event.detail.target.id !== "comments-list") return
+    event.detail.target.querySelectorAll(".comment[data-temp-id]").forEach((comment) => {
+      const tempId = comment.getAttribute("data-temp-id")
+      if (tempId) {
+        const optimistic = document.querySelector(`.comment--optimistic[data-temp-id="${tempId}"]`)
+        if (optimistic) optimistic.remove()
+      }
     })
   })
 </script>

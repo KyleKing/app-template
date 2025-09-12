@@ -23,10 +23,10 @@ function runAppTest(params: AppTestParams) {
     }
 
     const response = await app.request(params.url, requestOptions)
+    const responseText = await response.text() // prevent leaks even if not tested
 
     assertEquals(response.status, params.expectedStatus)
     if (params.expectedContent) {
-      const responseText = await response.text()
       assertEquals(responseText, params.expectedContent)
     }
   })
