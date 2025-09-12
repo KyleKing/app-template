@@ -27,7 +27,7 @@
   "test": {},
   "tasks": {
     "bench": "LOG_LEVEL=error deno bench --allow-read --allow-write --allow-env --allow-ffi --allow-sys --check",
-    "build:shared": "deno run --allow-read --allow-write --allow-env ./scripts/build-shared.ts",
+    "build:shared": "deno run --allow-read --allow-write --allow-env --allow-net ./scripts/build-shared.ts",
     "check": "deno check --frozen",
     "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-ffi --check --lock --output ./dist/deno-template ./scripts/app-server.ts",
     "dev": "deno task build:shared && deno run --allow-net --allow-sys --allow-read --allow-write --allow-env --allow-ffi ./scripts/app-server.ts",
