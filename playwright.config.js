@@ -37,6 +37,12 @@ export default defineConfig({
     baseURL: BASE_URL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
+    /* Ensure JavaScript is enabled */
+    javaScriptEnabled: true,
+    /* Capture screenshots on failure */
+    screenshot: "only-on-failure",
+    /* Capture video on failure in CI */
+    video: Deno.env.get("CI") ? "retain-on-failure" : "off",
   },
 
   projects: [
