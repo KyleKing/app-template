@@ -67,7 +67,7 @@
 /* Prevent slight overscroll bounce */
 html, body {
   overscroll-behavior: none;
-  height: 100%;
+  min-height: 100%;
   margin: 0;
 }
 
@@ -129,7 +129,7 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Subtle texture layer (reduced visual noise) */
+/* Subtle texture layer */
 .page::before,
 .page::after {
   content: "";
@@ -154,7 +154,6 @@ html, body {
     radial-gradient(1px 1px at 75% 80%, rgba(0, 0, 0, 0.05), transparent);
   opacity: 0.18;
 }
-/* removed drift animation for calmer surface */
 
 /* Header / footer shells */
 .page__header, .page__footer {
