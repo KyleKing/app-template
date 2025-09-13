@@ -37,7 +37,7 @@ jobs:
       - name: Check Biome
         run: deno task biome:check
 
-      - name: Install Playwright browsers
-        run: deno run --allow-all npm:playwright install --with-deps
+      - name: Install Playwright browser for mobile Safair (webkit)
+        run: deno run --allow-all npm:playwright install webkit --with-deps
       - name: Run e2e Tests
-        run: deno task test:e2e
+        run: deno task test:e2e --project=iphone
