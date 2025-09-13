@@ -35,10 +35,10 @@ export function handleApiError(
 
   if (responseType === "json") {
     return c.json({ error: message, details: err.message }, statusCode as any)
-  } else if (responseType === "text") {
-    return c.text(`${message}: ${err.message}`, statusCode as any)
-  } else {
-    const html = `<div class="error"><h1>Error</h1><p>${err.message}</p></div>`
-    return c.html(html, statusCode as any)
   }
+  if (responseType === "text") {
+    return c.text(`${message}: ${err.message}`, statusCode as any)
+  }
+  const html = `<div class="error"><h1>Error</h1><p>${err.message}</p></div>`
+  return c.html(html, statusCode as any)
 }

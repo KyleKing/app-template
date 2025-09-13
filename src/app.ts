@@ -1,14 +1,13 @@
+import { api } from "@/api.ts"
+import { extendLogContext, getLogContext, initializeContext } from "@/logContext.ts"
+import { commentsRouter } from "@/partials/commentsRouter.ts"
+import { renderPage } from "@/templates/helpers.ts"
+import { getEnvConfig } from "@/utils/env.ts"
+import { handleApiError } from "@/utils/errorHandler.ts"
 import { configure, getConsoleSink, getLogger } from "@logtape/logtape"
 import { Hono } from "hono"
 import { serveStatic } from "hono/deno"
-import { api } from "@/api.ts"
-import { commentsRouter } from "@/partials/commentsRouter.ts"
-import { renderPage } from "@/templates/helpers.ts"
-import { handleApiError } from "@/utils/errorHandler.ts"
-import { getEnvConfig } from "@/utils/env.ts"
 import { MAX_AUTHOR_LEN, MAX_BODY_LEN } from "~/commentShape.ts"
-import { dirname, join } from "@std/path"
-import { extendLogContext, getLogContext, initializeContext } from "@/logContext.ts"
 
 await configure({
   sinks: {

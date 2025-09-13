@@ -15,6 +15,6 @@ Deno.bench("autoTrim - large HTML", () => {
 })
 
 Deno.bench("autoTrim - already clean HTML", () => {
-  const html = `<div><h1>Title</h1><p>Content</p></div>`
+  const html = "<div><h1>Title</h1><p>Content</p></div>"
   autoTrim(html)
 })

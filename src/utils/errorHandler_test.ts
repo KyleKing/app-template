@@ -1,5 +1,5 @@
-import { assertEquals } from "@std/assert"
 import { handleApiError } from "@/utils/errorHandler.ts"
+import { assertEquals } from "@std/assert"
 
 // Mock Context
 class MockContext {
@@ -8,7 +8,7 @@ class MockContext {
     method: string
   }
 
-  constructor(path: string = "/iapi/test") {
+  constructor(path = "/iapi/test") {
     this.req = {
       path,
       method: "GET",

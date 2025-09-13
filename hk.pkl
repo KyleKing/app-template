@@ -5,25 +5,31 @@ hooks {
         fix = true
         steps {
             ["bench"] {
-                glob = List("*_bench.ts")
+                glob = "*_bench.ts"
                 check = "deno task bench"
             }
+            ["biome"] {
+                glob = "*.ts"
+                check = "deno task biome:check {{files}}"
+                fix = "deno task biome:fix {{files}}"
+            }
             ["check"] {
-                glob = List("*.ts")
+                glob = "*.ts"
                 check = "deno check"
             }
             ["fmt"] {
+                glob = "*.ts"
                 check = "deno task fmt --check {{files}}"
                 fix = "deno task fmt {{files}}"
             }
             ["test"] {
-                glob = List("*_test.ts")
+                glob = "*_test.ts"
                 check = "deno task test"
             }
             ["test:e2e"] {
-                glob = List("*.ts")
+                glob = "*.ts"
                 check = "deno task test:e2e --project=firefox"
-                // profiles = List("slow")
+                // profiles = "slow")
             }
         }
     }

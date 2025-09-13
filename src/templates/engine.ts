@@ -1,5 +1,5 @@
-import vento from "vento/mod.ts"
 import { autoTrim } from "@/utils/autoTrim.ts"
+import vento from "vento/mod.ts"
 
 // Docs: https://vento.js.org/configuration
 export const engine = vento({ autoescape: true })

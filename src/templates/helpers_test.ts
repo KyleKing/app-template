@@ -1,5 +1,5 @@
-import { assertEquals } from "@std/assert"
 import { renderPage } from "@/templates/helpers.ts"
+import { assertEquals } from "@std/assert"
 
 // Mock Context
 class MockContext {

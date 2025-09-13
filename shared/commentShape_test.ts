@@ -1,5 +1,5 @@
+import { assert, assertEquals } from "@std/assert"
 import { escapeHtml, generateTempId, MAX_AUTHOR_LEN, MAX_BODY_LEN, shapeCommentInput } from "~/commentShape.ts"
-import { assert, assertEquals, assertStringIncludes } from "@std/assert"
 
 Deno.test("shapeCommentInput - trims text", () => {
   const author = "Tame Impala"

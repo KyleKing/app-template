@@ -1,5 +1,5 @@
-import { assertEquals } from "@std/assert"
 import { app } from "@/app.ts"
+import { assertEquals } from "@std/assert"
 
 interface TestParams {
   name: string

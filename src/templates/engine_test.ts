@@ -1,5 +1,5 @@
-import { assertEquals } from "@std/assert"
 import { renderTemplate } from "@/templates/engine.ts"
+import { assertEquals } from "@std/assert"
 
 Deno.test("renderTemplate - renders simple template", async () => {
   const pathTemplate = "./src/templates/layouts/test-template.vto"

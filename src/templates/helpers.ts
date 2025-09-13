@@ -3,7 +3,7 @@ import type { Context } from "hono"
 
 export async function renderPage(
   pageTemplate: string,
-  data: Record<string, unknown> = {},
+  data: Record<string, unknown>,
   title: string,
   c: Context,
 ): Promise<Response> {

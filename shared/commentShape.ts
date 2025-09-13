@@ -34,7 +34,7 @@ export function shapeCommentInput(source: unknown): ShapedCommentInput {
 }
 
 export function generateTempId(): string {
-  return "temp-" + Math.random().toString(36).slice(2)
+  return `temp-${Math.random().toString(36).slice(2)}`
 }
 
 export function escapeHtml(str: string): string {
