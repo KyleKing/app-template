@@ -1,18 +1,14 @@
-import { configure, getConsoleSink, getLogger, withContext } from "@logtape/logtape"
+import { configure, getConsoleSink, getLogger } from "@logtape/logtape"
 import { Hono } from "hono"
 import { serveStatic } from "hono/deno"
-import { AsyncLocalStorage } from "node:async_hooks"
-import { dirname, join } from "@std/path"
 import { api } from "@/api.ts"
-import { renderTemplate } from "@/templates/engine.ts"
 import { commentsRouter } from "@/partials/commentsRouter.ts"
 import { renderPage } from "@/templates/helpers.ts"
 import { handleApiError } from "@/utils/errorHandler.ts"
 import { getEnvConfig } from "@/utils/env.ts"
 import { MAX_AUTHOR_LEN, MAX_BODY_LEN } from "~/commentShape.ts"
-
-const __dirname = dirname(new URL(import.meta.url).pathname)
-const publicRoot = join(__dirname, "../../public")
+import { dirname, join } from "@std/path"
+import { extendLogContext, getLogContext, initializeContext } from "@/logContext.ts"
 
 await configure({
   sinks: {
@@ -24,6 +20,7 @@ await configure({
           category: record.category,
           message: record.message,
           ...record.properties,
+          ...(getLogContext() || {}),
         }
         return JSON.stringify(logEntry)
       },
@@ -33,7 +30,6 @@ await configure({
     { category: ["app"], sinks: ["console"], lowestLevel: getEnvConfig().LOG_LEVEL },
     { category: ["logtape", "meta"], sinks: ["console"], lowestLevel: "warning" },
   ],
-  contextLocalStorage: new AsyncLocalStorage(),
 })
 
 const app = new Hono()
@@ -42,33 +38,50 @@ const logger = getLogger(["app"])
 app.use("*", async (c, next) => {
   const startTime = Date.now()
 
-  await withContext(
-    {
-      host: c.req.header("Host"),
-      ipAddress: c.req.header("X-Forwarded-For"),
-      method: c.req.method,
-      path: c.req.path,
-      referer: c.req.header("Referer"),
-      requestId: crypto.randomUUID(),
-      url: c.req.url,
-      contentType: c.req.header("Content-Type"),
-    },
+  await initializeContext(
     async () => {
+      extendLogContext({
+        host: c.req.header("Host"),
+        ipAddress: c.req.header("X-Forwarded-For"),
+        method: c.req.method,
+        path: c.req.path,
+        referer: c.req.header("Referer"),
+        requestId: crypto.randomUUID(),
+        url: c.req.url,
+        contentType: c.req.header("Content-Type"),
+      })
+
       await next()
 
       const uptime = Math.floor(Deno.osUptime() * 1000) // ms
-      const ctx = {
+      const memoryUsage = Deno.memoryUsage()
+      const systemMemory = Deno.systemMemoryInfo()
+
+      extendLogContext({
         status: c.res.status,
         duration: Date.now() - startTime,
         responseSize: c.res.headers.get("Content-Length"),
         uptime,
-      }
+        memoryUsage: {
+          rss: memoryUsage.rss,
+          heapTotal: memoryUsage.heapTotal,
+          heapUsed: memoryUsage.heapUsed,
+          external: memoryUsage.external,
+        },
+        systemMemory: {
+          total: systemMemory.total,
+          free: systemMemory.free,
+          available: systemMemory.available,
+        },
+        responseContentType: c.res.headers.get("Content-Type"),
+      })
+
       if (c.res.status >= 500) {
-        logger.error("Request completed", ctx)
+        logger.error("Request completed")
       } else if (c.res.status >= 400) {
-        logger.warning("Request completed", ctx)
+        logger.warning("Request completed")
       } else {
-        logger.info("Request completed", ctx)
+        logger.info("Request completed")
       }
     },
   )

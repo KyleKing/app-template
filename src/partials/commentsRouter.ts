@@ -3,12 +3,17 @@ import { addComment, listComments } from "@/partials/commentsStore.ts"
 import { renderTemplate } from "@/templates/engine.ts"
 import { handleApiError } from "@/utils/errorHandler.ts"
 import { shapeCommentInput } from "~/commentShape.ts"
+import { extendLogContext } from "@/logContext.ts"
 
 export const commentsRouter = new Hono()
 
 commentsRouter.get("/comments", async (c) => {
   try {
     const comments = listComments()
+    extendLogContext({
+      operation: "list_comments",
+      resourceCount: comments.length,
+    })
     const html = await renderTemplate("partials/commentList.vto", { comments })
     return c.html(html)
   } catch (error) {
@@ -24,6 +29,16 @@ commentsRouter.post("/comments", async (c) => {
       return c.text("Comment body required", 400)
     }
     const comment = addComment({ author, body })
+
+    extendLogContext({
+      operation: "create_comment",
+      resourceId: comment.id,
+      commentLength: body.length,
+      authorLength: author.length,
+      isAnonymous: author === "Anon",
+      tempId: tempId || null,
+    })
+
     let html = await renderTemplate("partials/commentItem.vto", { comment })
     if (tempId) {
       html = html.replace('<li class="comment"', `<li class="comment" data-temp-id="${tempId}"`)
