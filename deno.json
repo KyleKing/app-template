@@ -29,9 +29,9 @@
   "test": {},
   "tasks": {
     "bench": "LOG_LEVEL=error deno bench --allow-read --allow-write --allow-env --allow-ffi --allow-sys --check",
-    "biome": "deno run --allow-read --allow-write --allow-env --allow-run @biomejs/biome check",
+    "biome": "deno run --allow-read --allow-write --allow-env --allow-run @biomejs/biome",
     "biome:check": "deno task biome check",
-    "biome:fix": "deno task biome --write",
+    "biome:fix": "deno task biome check --write",
     "build:shared": "deno run --allow-read --allow-write --allow-env --allow-net ./scripts/build-shared.ts",
     "check": "deno check --frozen",
     "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-ffi --check --lock --output ./dist/deno-template ./scripts/app-server.ts",
