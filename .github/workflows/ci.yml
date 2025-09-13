@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -38,10 +42,10 @@ jobs:
       - name: Check Biome
         run: deno task biome:check
 
-      - name: Install Playwright browser for mobile Safari (webkit)
-        run: deno run --allow-all npm:playwright install webkit --with-deps
+      - name: Install Playwright browser for headless Chrome (fastest install)
+        run: deno run --allow-all npm:playwright install chromium --only-shell
       - name: Run e2e Tests
-        run: deno task test:e2e --project=iphone
+        run: deno task test:e2e --project=chrome
       - name: Upload test artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4

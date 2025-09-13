@@ -22,16 +22,7 @@ export default defineConfig({
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
-    ["list"],
-    [
-      "html",
-      {
-        open: "never",
-        outputFolder: "playwright-report",
-      },
-    ],
-  ],
+  reporter: process.env.CI ? "github" : "html",
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: BASE_URL,
@@ -47,6 +38,10 @@ export default defineConfig({
 
   projects: [
     {
+      name: "chrome",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
       name: "firefox",
       use: { ...devices["Desktop Firefox"] },
     },
@@ -61,5 +56,6 @@ export default defineConfig({
     command: `PORT=${PORT} deno task dev`,
     url: BASE_URL,
     reuseExistingServer: !Deno.env.get("CI"),
+    timeout: 30 * 1000,
   },
 })
