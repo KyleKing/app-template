@@ -3,6 +3,10 @@ import { expect, test } from "@playwright/test"
 test("comment demo works", async ({ page }) => {
   await page.goto("/comments")
   await expect(page.locator("h1")).toContainText("Comments")
+
+  // HACK: Debug returned HTML
+  const commentsListHTML = await page.locator("html").innerHTML()
+  console.log("\nHTML:", commentsListHTML)
   await page.waitForSelector("#comments-list li")
 
   const htmxLoaded = await page.evaluate(() => typeof window.htmx !== "undefined")
