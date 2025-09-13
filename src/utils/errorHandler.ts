@@ -1,5 +1,5 @@
-import { getLogger } from "@logtape/logtape"
 import type { Context } from "hono"
+import { extendLogContext } from "@/logContext.ts"
 
 export interface ErrorContext {
   [key: string]: any
@@ -17,8 +17,6 @@ export function handleApiError(
   c: Context,
   options: ApiErrorOptions = {},
 ): Response {
-  const err = error as Error
-
   const {
     message = "An error occurred",
     statusCode = 500,
@@ -26,11 +24,12 @@ export function handleApiError(
     responseType = c.req.path.startsWith("/iapi/") ? "json" : "html",
   } = options
 
-  const logger = getLogger(["app"])
-  logger.error(message, {
+  const err = error as Error
+  extendLogContext({
+    errorUser: message,
     error: { name: err.name, message: err.message, stack: err.stack },
     request: { method: c.req.method, path: c.req.path },
-    ...context,
+    context,
   })
 
   if (responseType === "json") {
