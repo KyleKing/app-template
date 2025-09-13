@@ -20,9 +20,10 @@ jobs:
           cache: true
           deno-version: v2.x
 
-      - name: Install dependencies
+      - name: Install dependencies and build assets
         run: |
           deno install
+          ./scripts/download-assets.sh
           deno task build:shared
 
       - name: Run Tests
