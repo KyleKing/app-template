@@ -1,3 +1,8 @@
+/*
+ * Not recommended to use mutable contexts like this, but only way for single canonical logs
+ * https://github.com/dahlia/logtape/discussions/84#discussioncomment-14346710
+ */
+
 import { AsyncLocalStorage } from "node:async_hooks"
 
 export const privateAsyncLocalStorage = new AsyncLocalStorage<{ logContext?: Record<string, unknown> }>()

@@ -36,7 +36,7 @@ const app = new Hono()
 const logger = getLogger(["app"])
 
 app.use("*", async (c, next) => {
-  const startTime = Date.now()
+  const startTime = performance.now()
 
   await initializeContext(
     async () => {
@@ -49,30 +49,19 @@ app.use("*", async (c, next) => {
         requestId: crypto.randomUUID(),
         url: c.req.url,
         contentType: c.req.header("Content-Type"),
+        userAgent: c.req.header("User-Agent"),
+        acceptLanguage: c.req.header("Accept-Language"),
+        origin: c.req.header("Origin"),
+        xForwardedProto: c.req.header("X-Forwarded-Proto"),
+        requestSize: c.req.header("Content-Length"),
       })
 
       await next()
 
-      const uptime = Math.floor(Deno.osUptime() * 1000) // ms
-      const memoryUsage = Deno.memoryUsage()
-      const systemMemory = Deno.systemMemoryInfo()
-
       extendLogContext({
         status: c.res.status,
-        duration: Date.now() - startTime,
-        responseSize: c.res.headers.get("Content-Length"),
-        uptime,
-        memoryUsage: {
-          rss: memoryUsage.rss,
-          heapTotal: memoryUsage.heapTotal,
-          heapUsed: memoryUsage.heapUsed,
-          external: memoryUsage.external,
-        },
-        systemMemory: {
-          total: systemMemory.total,
-          free: systemMemory.free,
-          available: systemMemory.available,
-        },
+        duration: performance.now() - startTime,
+        // PLANNED: responseSize: c.res.headers.get("Content-Length"),
         responseContentType: c.res.headers.get("Content-Type"),
       })
 

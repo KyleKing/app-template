@@ -35,7 +35,6 @@ commentsRouter.post("/comments", async (c) => {
       resourceId: comment.id,
       commentLength: body.length,
       authorLength: author.length,
-      isAnonymous: author === "Anon",
       tempId: tempId || null,
     })
 
