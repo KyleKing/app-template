@@ -1,8 +1,7 @@
 import { app } from "@/app.ts"
-import { getEnvConfig, validateEnvConfig } from "@/utils/env.ts"
+import { getEnvConfig } from "@/utils/env.ts"
 
 const config = getEnvConfig()
-validateEnvConfig(config)
 
 Deno.serve({
   port: config.PORT,
