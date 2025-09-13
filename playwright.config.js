@@ -17,6 +17,9 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: Deno.env.get("CI") ? 1 : undefined,
 
+  timeout: 5_000,
+  expect: { timeout: 1_000 },
+
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [

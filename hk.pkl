@@ -18,7 +18,6 @@ hooks {
                 check = "deno check"
             }
             ["fmt"] {
-                glob = "*.ts"
                 check = "deno task fmt --check {{files}}"
                 fix = "deno task fmt {{files}}"
             }
