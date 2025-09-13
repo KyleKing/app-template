@@ -42,7 +42,7 @@
     "test:cov": "deno task test --clean --coverage=coverage && deno coverage coverage",
     "test:e2e": "deno run --allow-all npm:playwright test",
     "test:e2e:install": "deno install && deno run --allow-all npm:playwright install",
-    "test:e2e:ui": "deno task test:e2e --debug --project=firefox",
+    "test:e2e:ui": "deno task test:e2e --debug --project=chrome",
     "test:watch": "deno task test --trace-leaks --watch"
   },
   "imports": {

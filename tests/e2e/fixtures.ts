@@ -4,6 +4,7 @@ import { expect, test as base } from "@playwright/test"
 type Fixtures = {
   consoleMessages: string[] // All
   consoleErrors: string[] // Errors Only
+  cssCoverage: number // Percent of CSS used (*Chromium only)
 }
 
 export const test = base.extend<Fixtures>({
@@ -20,6 +21,32 @@ export const test = base.extend<Fixtures>({
     const errors = consoleMessages.filter((m) => m.startsWith("error:"))
     await use(errors)
   },
+  cssCoverage: [async ({ page, browserName }, use) => {
+    // Only supported in Chromium via CDP
+    if (browserName !== "chromium") {
+      await use(0)
+      return
+    }
+
+    // Capture usage with 'Chrome DevTools Protocol' (CDP)
+    const client = await (page.context() as any).newCDPSession(page)
+    await client.send("DOM.enable")
+    await client.send("CSS.enable")
+    await client.send("CSS.startRuleUsageTracking")
+    await use(0)
+    const { ruleUsage } = await client.send("CSS.stopRuleUsageTracking")
+
+    let usedBytes = 0
+    let totalBytes = 0
+    for (const usage of ruleUsage as any[]) {
+      const len = usage.endOffset - usage.startOffset
+      totalBytes += len
+      if (usage.used) usedBytes += len
+    }
+    const percent = totalBytes ? (usedBytes / totalBytes) * 100 : 0
+    console.log(`[css-coverage] ${percent.toFixed(2)}% used (${usedBytes}/${totalBytes} chars)`)
+    expect(percent).toBeGreaterThanOrEqual(90)
+  }, { auto: true }],
 })
 
 test.afterEach(async ({ consoleErrors, consoleMessages }) => {

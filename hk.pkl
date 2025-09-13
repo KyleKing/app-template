@@ -27,7 +27,7 @@ hooks {
             }
             ["test:e2e"] {
                 glob = "*.ts"
-                check = "deno task test:e2e --project=firefox"
+                check = "deno task test:e2e --project=chrome"
                 // profiles = "slow")
             }
         }
