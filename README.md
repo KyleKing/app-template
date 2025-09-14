@@ -15,7 +15,7 @@ mise run build
 
 ```sh
 mise watch build # Keeps built files up to date
-mise watch dev |& tail-jsonl # Hot reloads on TS changes, while mise watches .vto. Optionally run with `pipx:tail-jsonl`
+mise watch dev --restart |& tail-jsonl # Hot reloads on TS changes, while mise watches .vto. Optionally run with `pipx:tail-jsonl`
 
 deno task test:watch
 
