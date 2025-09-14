@@ -1,8 +1,8 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
   "files": {
-    "include": ["**/*.ts"],
-    "ignore": ["**/node_modules/**", "**/*.min.js", "**/dist/**", "**/coverage/**"]
+    "includes": ["**/*.ts"],
+    "experimentalScannerIgnores": ["**/node_modules/**", "**/*.min.js", "**/dist/**", "**/coverage/**"]
   },
   "formatter": {
     "enabled": false
@@ -34,7 +34,11 @@
     },
     "globals": ["console", "Deno", "window", "document", "FormData"]
   },
-  "organizeImports": {
-    "enabled": false
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "off"
+      }
+    }
   }
 }

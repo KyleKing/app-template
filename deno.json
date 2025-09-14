@@ -47,7 +47,7 @@
   },
   "imports": {
     "@/": "./src/",
-    "@biomejs/biome": "npm:@biomejs/biome@^1.9.4",
+    "@biomejs/biome": "npm:@biomejs/biome@^2.2.4",
     "@deno/graph": "jsr:@deno/graph@^0.100.0",
     "@logtape/logtape": "jsr:@logtape/logtape@^1.1.0",
     "@playwright/test": "npm:@playwright/test@^1.55.0",
@@ -55,9 +55,9 @@
     "@std/path": "jsr:@std/path@1.1.2",
     "@std/testing": "jsr:@std/testing@^1.0.15",
     "@x/emit/": "https://deno.land/x/emit/",
-    "hono": "npm:hono@4.9.6",
+    "hono": "npm:hono@4.9.7",
     "nanoid": "npm:nanoid@5.1.5",
-    "vento/": "https://deno.land/x/vento@v2.0.1/",
+    "vento/": "https://deno.land/x/vento@v2.0.2/",
     "zod": "npm:zod@^4.1.8",
     "~/": "./shared/"
   }
