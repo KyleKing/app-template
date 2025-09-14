@@ -18,17 +18,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
-        with:
-          cache: true
-          deno-version: v2.x
+      - uses: jdx/mise-action@v2
 
       - name: Install dependencies and build assets
         run: |
           deno install
-          ./scripts/download-assets.sh
-          deno task build:shared
+          mise run build
 
       - name: Run Tests
         run: deno task test
@@ -40,7 +35,7 @@ jobs:
         run: deno task fmt --check
 
       - name: Check Biome
-        run: deno task biome:check
+        run: deno task biome check
 
       - name: Install Playwright browser for headless Chrome (fastest install)
         run: deno run --allow-all npm:playwright install chromium --only-shell

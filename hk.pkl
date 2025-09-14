@@ -10,8 +10,8 @@ hooks {
             }
             ["biome"] {
                 glob = "*.ts"
-                check = "deno task biome:check {{files}}"
-                fix = "deno task biome:fix {{files}}"
+                check = "deno task biome check {{files}}"
+                fix = "deno task biome check --write {{files}}"
             }
             ["check"] {
                 glob = "*.ts"

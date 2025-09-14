@@ -8,16 +8,18 @@ A simplified Deno web application built with Hono (API), Vento (templating), and
 mise install
 deno install
 hk install
+mise run build
 ```
 
 ## Development
 
 ```sh
-deno task dev # Run locally and watch changes (but FYI not on .vto files nor watches ts>js build step)
-
-hk run pre-commit --all
+mise watch build # Keeps built files up to date
+mise watch dev |& tail-jsonl # Hot reloads on TS changes, while mise watches .vto. Optionally run with `pipx:tail-jsonl`
 
 deno task test:watch
+
+hk run pre-commit --all
 ```
 
 ## Production
