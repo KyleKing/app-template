@@ -3,7 +3,7 @@ import { join } from "@std/path"
 const stylesDir = join(Deno.cwd(), "styles")
 const publicDir = join(Deno.cwd(), "public")
 
-async function buildCss({ minify = false } ) {
+async function buildCss({ minify = false }) {
   const files = [
     "tokens.css",
     "base.css",
@@ -18,7 +18,7 @@ async function buildCss({ minify = false } ) {
     css += `${content}\n`
   }
 
-  const outPath = join(publicDir, "styles.css")
+  const outPath = join(publicDir, "styles.min.css")
   if (minify) {
     // Simple minification: remove comments, extra whitespace
     css = css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\s+/g, " ").replace(/\s*{\s*/g, "{").replace(/\s*}\s*/g, "}")
@@ -29,4 +29,4 @@ async function buildCss({ minify = false } ) {
   console.log(`CSS built${minify ? " (minified)" : ""} to ${outPath}`)
 }
 
-await buildCss({minify: Deno.args.includes("--minify")})
+await buildCss({ minify: Deno.args.includes("--minify") })

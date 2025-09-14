@@ -49,7 +49,7 @@ const appTestCases = [
   },
   {
     name: "Static Files - Get Success",
-    url: "http://localhost/public/styles.css",
+    url: "http://localhost/public/styles.min.css",
     method: "GET",
     expectedStatus: 200,
   },

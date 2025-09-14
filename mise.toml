@@ -1,14 +1,8 @@
 [tools]
 deno = "latest"
 hk = "latest"
-"npm:dprint" = "latest"
 
 [tasks.build-css]
-description = "Build CSS from styles directory"
+description = "Build CSS from styles directory. Optionally compress with `--minify`"
 run = "deno run --allow-read --allow-write ./scripts/build-css.ts"
-sources = ["styles/**/*.css"]
-
-[tasks.build-css-prod]
-description = "Build minified CSS for production"
-run = "deno run --allow-read --allow-write ./scripts/build-css.ts --minify"
 sources = ["styles/**/*.css"]

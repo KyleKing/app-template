@@ -147,6 +147,9 @@ dist
 
 # Custom
 
+## Minified Assets
+public/**/*.min.css
+
 ## Playwright
 playwright-report/*
 test-results/*
