@@ -1,0 +1,63 @@
+/* Root theme tokens */
+:root {
+  /* Page gradient stops */
+  --c-bg-page-1: #fafbff;
+  --c-bg-page-2: #f2f5fa;
+  --c-bg-page-3: #eef1f6;
+  --c-bg-page: linear-gradient(135deg, var(--c-bg-page-1) 0%, var(--c-bg-page-2) 60%, var(--c-bg-page-3) 100%);
+
+  /* Text */
+  --c-text-title: #1d1f27;
+  --c-text-body: #3a4250;
+  --c-text-muted: #4a4f58;
+  --c-link: #1d1f27;
+  --c-link-hover: #111;
+  --c-focus-outline: #fff;
+
+  /* Accents / lines */
+  --c-accent-line-start: #111;
+  --c-accent-line-end: #666;
+
+  /* Shell / surfaces */
+  --c-header-bg: rgba(255, 255, 255, 0.65);
+  --c-header-bg-hover: rgba(255, 255, 255, 0.78);
+  --c-header-border: rgba(0, 0, 0, 0.07);
+
+  /* Footer */
+  --c-footer-link: #1d1f27;
+
+  /* Scrollbar */
+  --c-scrollbar-track: rgba(255, 255, 255, 0.05);
+  --c-scrollbar-thumb: #cfd5dd;
+  --c-scrollbar-thumb-border: #f4f6f9;
+  --c-scrollbar-thumb-hover: #b9c0c8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg-page-1: #0f1014;
+    --c-bg-page-2: #171b23;
+    --c-bg-page-3: #1f242c;
+    --c-bg-page: linear-gradient(180deg, var(--c-bg-page-1) 0%, var(--c-bg-page-2) 55%, var(--c-bg-page-3) 100%);
+
+    --c-text-title: #f3f6fa;
+    --c-text-body: #d5dae3;
+    --c-text-muted: #a8adb7;
+    --c-link: #f5f7fa;
+    --c-link-hover: #f5f7fa;
+
+    --c-accent-line-start: #f5f7fa;
+    --c-accent-line-end: #f5f7fa;
+
+    --c-header-bg: rgba(22, 24, 32, 0.7);
+    --c-header-bg-hover: rgba(22, 24, 32, 0.85);
+    --c-header-border: rgba(255, 255, 255, 0.05);
+
+    --c-footer-link: #f5f7fa;
+
+    --c-scrollbar-track: rgba(22, 24, 32, 0.35);
+    --c-scrollbar-thumb: #3a4250;
+    --c-scrollbar-thumb-border: #171b23;
+    --c-scrollbar-thumb-hover: #4a5563;
+  }
+}

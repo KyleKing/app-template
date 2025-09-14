@@ -7,30 +7,30 @@
     <script src="/public/htmx.min.js"></script>
     <link rel="stylesheet" href="/public/styles.css">
   </head>
-  <body class="page layout">
-    <header class="page__header layout__header">
-      <div class="main header__inner">
-        <nav class="nav" aria-label="Primary">
-          <a class="nav__brand" href="/">Site</a>
-          <ul class="nav__list">
-            <li class="nav__item"><a class="nav__link" href="/Home">Home</a></li>
-            <li class="nav__item">
-              <a class="nav__link" href="/Testing%20Escaping%20%3Cscript%3Ealert%28%27xss%27%29%3C%255cscript%3E"
+  <body class="c-page c-layout">
+    <header class="c-page__header c-layout__header">
+      <div class="c-main c-header__inner">
+        <nav class="c-nav" aria-label="Primary">
+          <a class="c-nav__brand" href="/">Site</a>
+          <ul class="c-nav__list">
+            <li class="c-nav__item"><a class="c-nav__link" href="/Home">Home</a></li>
+            <li class="c-nav__item">
+              <a class="c-nav__link" href="/Testing%20Escaping%20%3Cscript%3Ealert%28%27xss%27%29%3C%255cscript%3E"
               >Alert</a>
             </li>
-            <li class="nav__item"><a class="nav__link" href="/comments">Comments Demo</a></li>
+            <li class="c-nav__item"><a class="c-nav__link" href="/comments">Comments Demo</a></li>
           </ul>
         </nav>
       </div>
     </header>
 
-    <main class="main main__content layout__main" id="main-content" tabindex="-1">
+    <main class="c-main c-main__content c-layout__main" id="main-content" tabindex="-1">
       {{ content |> safe }}
     </main>
 
-    <footer class="page__footer layout__footer">
-      <div class="main footer__inner">
-        <p class="footer__text">
+    <footer class="c-page__footer c-layout__footer">
+      <div class="c-main c-footer__inner">
+        <p class="c-footer__text">
           Made with minimal dependencies using Deno + Hono + Vento + HTMX + sprinkle of OpenCode ✨
         </p>
       </div>

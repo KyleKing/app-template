@@ -1,13 +1,13 @@
-<h1 class="main__title">Comments</h1>
-<p class="main__content">
+<h1 class="c-main__title">Comments</h1>
+<p class="c-main__content">
   When submitting a comment, the new comment appears optimistically before being replaced by the server version to
   demonstrate more advanced UX with HTMX
 </p>
 
-<section class="comments" id="comments-demo">
+<section class="c-comments" id="comments-demo">
   <form
     id="comment-form"
-    class="comment-form"
+    class="c-comment-form"
     hx-post="/partials/comments"
     hx-target="#comments-list"
     hx-swap="afterbegin"
@@ -16,11 +16,11 @@
   >
     <fieldset>
       <legend>Add Comment</legend>
-      <div class="field-row">
+      <div class="c-field-row">
         <label for="author">Author Name</label>
         <input id="author" name="author" required maxlength="{{ MAX_AUTHOR_LEN }}" autocomplete="name" />
       </div>
-      <div class="field-row">
+      <div class="c-field-row">
         <label for="body">Comment</label>
         <textarea
           id="body"
@@ -36,7 +36,8 @@
     </fieldset>
   </form>
 
-  <ol id="comments-list" class="comments__list" hx-get="/partials/comments" hx-trigger="load" hx-swap="innerHTML"></ol>
+  <ol id="comments-list" class="c-comments__list" hx-get="/partials/comments" hx-trigger="load" hx-swap="innerHTML">
+  </ol>
 
   <template id="comment-item-template">
     {{ include "../partials/commentItem.vto" { comment: { id: "", author: "", createdAt: "", body: "" } } |> safe }}
@@ -66,7 +67,7 @@
     const list = document.getElementById("comments-list")
     if (list) {
       const node = tpl.content.firstElementChild.cloneNode(true)
-      node.classList.add("comment--optimistic")
+      node.classList.add("c-comment--optimistic")
       node.setAttribute("data-temp-id", tempId)
       node.querySelector('[data-field="author"]').textContent = escapeHtml(shaped.author)
       node.querySelector('[data-field="time"]').textContent = "(sending…)"
@@ -77,10 +78,10 @@
 
   document.body.addEventListener("htmx:afterSwap", (event) => {
     if (!event.detail.target || event.detail.target.id !== "comments-list") return
-    event.detail.target.querySelectorAll(".comment[data-temp-id]").forEach((comment) => {
+    event.detail.target.querySelectorAll(".c-comment[data-temp-id]").forEach((comment) => {
       const tempId = comment.getAttribute("data-temp-id")
       if (tempId) {
-        const optimistic = document.querySelector(`.comment--optimistic[data-temp-id="${tempId}"]`)
+        const optimistic = document.querySelector(`.c-comment--optimistic[data-temp-id="${tempId}"]`)
         if (optimistic) optimistic.remove()
       }
     })

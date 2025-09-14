@@ -23,11 +23,11 @@ test("comment demo works", async ({ page }) => {
   })
   await page.click('button[type="submit"]')
 
-  const optimisticComment = page.locator(".comment--optimistic")
+  const optimisticComment = page.locator(".c-comment--optimistic")
   await expect(optimisticComment.locator('[data-field="author"]')).toContainText(testAuthor)
   await expect(optimisticComment.locator('[data-field="body"]')).toContainText(testBody)
   await expect(optimisticComment.locator('[data-field="time"]')).toContainText("(sending…)")
-  await page.waitForSelector(".comment--optimistic", { state: "detached" })
+  await page.waitForSelector(".c-comment--optimistic", { state: "detached" })
 
   const commentsList = page.locator("#comments-list")
   const firstComment = commentsList.locator("li").first()

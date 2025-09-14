@@ -1,0 +1,66 @@
+/* Navigation (minimal underline accent) */
+.c-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  font-size: 0.95rem;
+}
+.c-nav__brand {
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -0.25px;
+  text-decoration: none;
+  color: var(--c-link);
+  position: relative;
+}
+.c-nav__brand::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--c-accent-line-start), var(--c-accent-line-end));
+  opacity: 0.35;
+}
+.c-nav__list {
+  list-style: none;
+  display: flex;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+}
+.c-nav__item {
+  /* No specific styles */
+}
+.c-nav__link {
+  position: relative;
+  color: var(--c-link);
+  text-decoration: none;
+  padding: 0.2rem 0.1rem;
+  border-radius: 2px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  display: inline-block;
+  line-height: 1.2;
+  transition: color 0.25s ease;
+}
+.c-nav__link::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: var(--c-accent-line-start);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s ease;
+}
+.c-nav__link:hover::before, .c-nav__link:focus-visible::before {
+  transform: scaleX(1);
+}
+.c-nav__link:hover, .c-nav__link:focus-visible {
+  outline: none;
+  color: var(--c-link-hover);
+}

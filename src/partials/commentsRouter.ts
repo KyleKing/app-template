@@ -40,7 +40,7 @@ commentsRouter.post("/comments", async (c) => {
 
     let html = await renderTemplate("partials/commentItem.vto", { comment })
     if (tempId) {
-      html = html.replace('<li class="comment"', `<li class="comment" data-temp-id="${tempId}"`)
+      html = html.replace('<li class="c-comment"', `<li class="c-comment" data-temp-id="${tempId}"`)
     }
     return c.html(html)
   } catch (error) {
