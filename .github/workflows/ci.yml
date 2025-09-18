@@ -38,9 +38,11 @@ jobs:
         run: deno task biome check
 
       - name: Install Playwright browser for headless Chrome (fastest install)
-        run: deno run --allow-all npm:playwright install chromium --only-shell
+        run: |
+          pip3 install playwright pytest-playwright
+          playwright install chromium --only-shell
       - name: Run e2e Tests
-        run: deno task test:e2e --project=chrome
+        run: python3 -m pytest tests/e2e/ -v --browser chromium
       - name: Upload test artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
