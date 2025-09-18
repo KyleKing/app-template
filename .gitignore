@@ -153,5 +153,3 @@ public/**/*.min.css
 ## Playwright
 playwright-report/*
 test-results/*
-
-*.pyc
