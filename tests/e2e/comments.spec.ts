@@ -29,6 +29,9 @@ test("comment demo works", async ({ page }) => {
   await expect(optimisticComment.locator('[data-field="time"]')).toContainText("(sending…)")
   await page.waitForSelector(".c-comment--optimistic", { state: "detached" })
 
+  await page.setViewportSize({ width: 800, height: 1200 })
+  await page.screenshot({ path: ".github/screenshots/comments-sending.png" })
+
   const commentsList = page.locator("#comments-list")
   const firstComment = commentsList.locator("li").first()
   await expect(firstComment.locator('[data-field="author"]')).toContainText(testAuthor)

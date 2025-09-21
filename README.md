@@ -1,6 +1,16 @@
 # App Template
 
-A simplified Deno web application built with Hono (API), Vento (templating), and HTMX (AJAX interactivity)
+A simplified Deno web application built with Hono (API), Vento (templating), and HTMX (AJAX interactivity). Used to experiment with sharing JS between client and server and managing CSS without a framework or React.
+
+## Screenshots
+
+### Home Page
+
+![Home Page](.github/screenshots/home-xss.png)
+
+### Comments Page
+
+![Comments Page](.github/screenshots/comments-sending.png)
 
 ## Setup
 
