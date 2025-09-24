@@ -57,7 +57,6 @@ export default defineConfig({
   webServer: {
     command: `PORT=${PORT} deno task dev`,
     url: BASE_URL,
-    reuseExistingServer: !Deno.env.get("CI"),
-    timeout: 30 * 1000,
+    timeout: 10 * 1000,
   },
 })

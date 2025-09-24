@@ -7,6 +7,6 @@ test("navigation works", async ({ page }) => {
   await expect(page).toHaveURL(/.+xss.+/)
   await expect(page.locator("h1").first()).toContainText("xss")
 
-  await page.setViewportSize({ width: 800, height: 600 })
+  await page.setViewportSize({ width: 800, height: 500 })
   await page.screenshot({ path: ".github/screenshots/home-xss.png" })
 })

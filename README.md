@@ -18,6 +18,7 @@ A simplified Deno web application built with Hono (API), Vento (templating), and
 mise install
 deno install
 hk install
+deno task test:e2e:install
 mise run build
 ```
 
