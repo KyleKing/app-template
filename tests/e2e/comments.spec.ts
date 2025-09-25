@@ -1,6 +1,6 @@
 import { expect, test } from "./fixtures.ts"
 
-test("comment demo works", async ({ page }) => {
+test("comment demo works", async ({ page, browserName }) => {
   await page.goto("/comments")
   await expect(page.locator("h1")).toContainText("Comments")
 
@@ -10,7 +10,7 @@ test("comment demo works", async ({ page }) => {
   await page.waitForSelector("#comments-list li")
 
   const testAuthor = "Test User"
-  const testBody = "This is a test comment for optimistic replacement"
+  const testBody = `This is a comment from ${browserName} to test optimistic replacement!`
   await page.fill("#author", testAuthor)
   await page.fill("#body", testBody)
 
@@ -29,8 +29,10 @@ test("comment demo works", async ({ page }) => {
   await expect(optimisticComment.locator('[data-field="time"]')).toContainText("(sending…)")
   await page.waitForSelector(".c-comment--optimistic", { state: "detached" })
 
-  await page.setViewportSize({ width: 800, height: 1000 })
-  await page.screenshot({ path: ".github/screenshots/comments-sending.png" })
+  if (browserName === "firefox") { // Deterministically generate with `deno task test:e2e --project=firefox`
+    await page.setViewportSize({ width: 800, height: 1000 })
+    await page.screenshot({ path: ".github/screenshots/comments-sending.png" })
+  }
 
   const commentsList = page.locator("#comments-list")
   const firstComment = commentsList.locator("li").first()
