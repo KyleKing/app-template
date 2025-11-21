@@ -34,6 +34,20 @@ await configure({
 const app = new Hono()
 const logger = getLogger(["app"])
 
+// Security headers middleware
+app.use("*", async (c, next) => {
+  await next()
+  c.res.headers.set("X-Content-Type-Options", "nosniff")
+  c.res.headers.set("X-Frame-Options", "DENY")
+  c.res.headers.set("X-XSS-Protection", "1; mode=block")
+  c.res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
+  c.res.headers.set(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'",
+  )
+})
+
+// Logging middleware
 app.use("*", async (c, next) => {
   const startTime = performance.now()
 
@@ -107,6 +121,10 @@ app.get(
     // PLANNED: Revisit support of compression: https://docs.deno.com/deploy/api/compression
     // precompressed: true,
     root: "./",
+    onFound: (_path, c) => {
+      // Cache static assets for 1 year (immutable for hashed assets)
+      c.header("Cache-Control", "public, max-age=31536000, immutable")
+    },
   }),
 )
 
