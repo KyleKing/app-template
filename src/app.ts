@@ -122,8 +122,9 @@ app.get(
     // precompressed: true,
     root: "./",
     onFound: (_path, c) => {
-      // Cache static assets for 1 year (immutable for hashed assets)
-      c.header("Cache-Control", "public, max-age=31536000, immutable")
+      // Use shorter cache for non-versioned assets to allow updates
+      // For production, consider adding version hashes to filenames for longer caching
+      c.header("Cache-Control", "public, max-age=3600")
     },
   }),
 )
