@@ -150,6 +150,9 @@ dist
 ## Minified Assets
 public/**/*.min.css
 
+## Backup files
+*.bak
+
 ## Playwright
 playwright-report/*
 test-results/*

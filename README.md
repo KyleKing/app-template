@@ -41,4 +41,34 @@ deno task prod # Serves production app from built executable
 
 ## Environment Variables
 
-See [./src/utils/env.ts](./src/utils/env.ts)
+See [./src/utils/env.ts](./src/utils/env.ts) for configuration options:
+
+- `NODE_ENV` - Environment mode (development/production/test)
+- `PORT` - Server port (default: 8080 dev, 8000 prod)
+- `HOST` - Server host (default: localhost dev, 0.0.0.0 prod)
+- `LOG_LEVEL` - Logging level (trace/debug/info/warning/error/fatal)
+
+## Security
+
+This template includes security best practices:
+
+- **XSS Protection**: Vento templating with `autoescape: true` enabled
+- **Security Headers**: CSP, X-Frame-Options, X-Content-Type-Options, etc.
+- **Asset Integrity**: SHA-256 verification for external dependencies
+- **Input Validation**: Zod schemas for runtime type checking
+
+See [SECURITY.md](./SECURITY.md) for details.
+
+## Architecture
+
+```
+src/
+  ├── api.ts              # API routes
+  ├── app.ts              # Main application & middleware
+  ├── partials/           # HTMX partial routes & stores
+  ├── templates/          # Vento templates (.vto files)
+  └── utils/              # Utilities (env, errors, etc.)
+shared/                   # Code shared between server & client
+scripts/                  # Build scripts
+tests/                    # Tests (unit & e2e)
+```
