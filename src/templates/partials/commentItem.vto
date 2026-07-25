@@ -5,6 +5,18 @@
       data-field="time"
       title="{{> if (comment.createdAt) { comment.createdAt.toISOString() } }}"
     >{{> if (comment.createdAt) comment.createdAt.toLocaleTimeString() }}</span>
+    {{ if comment.id }}
+      <button
+        type="button"
+        class="c-comment__delete"
+        aria-label="Delete comment"
+        data-confirm-label="Confirm?"
+        hx-delete="/partials/comments/{{ comment.id }}"
+        hx-target="closest li"
+        hx-swap="outerHTML swap:200ms"
+        hx-sync="closest li:abort"
+      >&times;</button>
+    {{ /if }}
   </div>
   <div class="c-comment__body" data-field="body">{{ comment.body }}</div>
 </li>

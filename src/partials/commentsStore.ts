@@ -39,3 +39,14 @@ export function addComment(input: CommentInput): Comment {
 export function getComment(id: string): Comment | undefined {
   return comments.find((c) => c.id === id)
 }
+
+export function deleteComment(id: string): boolean {
+  const index = comments.findIndex((c) => c.id === id)
+  if (index === -1) return false
+  comments.splice(index, 1)
+  return true
+}
+
+export function countComments(): number {
+  return comments.length
+}

@@ -108,6 +108,53 @@
 .c-comment__time {
   /* Additional styles if needed */
 }
+.c-comment__delete {
+  margin-left: auto;
+  font: inherit;
+  line-height: 1;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--c-text-muted);
+  cursor: pointer;
+}
+.c-comment__delete:hover {
+  color: #c0392b;
+  border-color: #c0392b;
+}
+.c-comment__delete--armed {
+  color: #fff;
+  background: #c0392b;
+  border-color: #c0392b;
+}
+@media (prefers-color-scheme: dark) {
+  .c-comment__delete {
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+}
+.c-comments__count {
+  font-size: 0.85rem;
+  color: var(--c-text-muted);
+}
+#comment-toast {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  background: #1d1f27;
+  color: #fff;
+  font-size: 0.85rem;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+#comment-toast.c-comment-toast--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
 .c-comment__body {
   white-space: pre-wrap;
   font-size: 0.95rem;

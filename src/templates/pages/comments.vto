@@ -3,14 +3,24 @@
   When submitting a comment, the new comment appears optimistically before being replaced by the server version to
   demonstrate more advanced UX with HTMX
 </p>
+<p class="c-main__content">
+  <span id="comments-count" class="c-comments__count">loading…</span>
+  &middot;
+  <label>
+    <input type="checkbox" id="htmx-debug-toggle" /> log htmx events to console
+  </label>
+</p>
 
 <section class="c-comments" id="comments-demo">
+  <div id="comment-toast" role="status" aria-live="polite"></div>
+
   <form
     id="comment-form"
     class="c-comment-form"
     hx-post="/partials/comments"
     hx-target="#comments-list"
-    hx-swap="afterbegin"
+    hx-swap="afterbegin settle:150ms"
+    hx-sync="this:drop"
     hx-on::before-request="optimisticComment(this)"
     hx-on::after-request="clearForm(this)"
   >
@@ -85,5 +95,51 @@
         if (optimistic) optimistic.remove()
       }
     })
+  })
+
+  // Server signals success via the `HX-Trigger` response header rather than the client
+  // inferring it from a status code, so other listeners (e.g. analytics) can react too.
+  document.body.addEventListener("comment-added", (event) => {
+    const toast = document.getElementById("comment-toast")
+    if (!toast) return
+    toast.textContent = `Comment posted by ${event.detail.author || "Anonymous"}`
+    toast.classList.add("c-comment-toast--visible")
+    setTimeout(() => toast.classList.remove("c-comment-toast--visible"), 2000)
+  })
+
+  // htmx fires `htmx:confirm` before every request. Intercepting it lets us swap the
+  // blocking native `window.confirm()` for an in-place "click again to confirm" arm state,
+  // which also keeps delete confirmable via keyboard/screen reader focus alone.
+  document.body.addEventListener("htmx:confirm", (event) => {
+    const trigger = event.detail.elt
+    if (!trigger.classList?.contains("c-comment__delete")) return
+    event.preventDefault()
+
+    if (trigger.dataset.armed === "true") {
+      delete trigger.dataset.armed
+      trigger.textContent = "×"
+      trigger.classList.remove("c-comment__delete--armed")
+      event.detail.issueRequest(true)
+      return
+    }
+
+    trigger.dataset.armed = "true"
+    trigger.textContent = trigger.dataset.confirmLabel
+    trigger.classList.add("c-comment__delete--armed")
+    setTimeout(() => {
+      if (trigger.dataset.armed !== "true") return
+      delete trigger.dataset.armed
+      trigger.textContent = "×"
+      trigger.classList.remove("c-comment__delete--armed")
+    }, 3000)
+  })
+
+  document.getElementById("htmx-debug-toggle")?.addEventListener("change", (event) => {
+    if (!window.htmx) return
+    if (event.target.checked) {
+      window.htmx.logAll()
+    } else {
+      window.htmx.logger = null
+    }
   })
 </script>

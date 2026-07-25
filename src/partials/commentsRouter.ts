@@ -1,5 +1,5 @@
 import { extendLogContext } from "@/logContext.ts"
-import { addComment, listComments } from "@/partials/commentsStore.ts"
+import { addComment, countComments, deleteComment, listComments } from "@/partials/commentsStore.ts"
 import { renderTemplate } from "@/templates/engine.ts"
 import { handleApiError } from "@/utils/errorHandler.ts"
 import { Hono } from "hono"
@@ -38,12 +38,32 @@ commentsRouter.post("/comments", async (c) => {
       tempId: tempId || null,
     })
 
-    let html = await renderTemplate("partials/commentItem.vto", { comment })
+    let itemHtml = await renderTemplate("partials/commentItem.vto", { comment })
     if (tempId) {
-      html = html.replace('<li class="c-comment"', `<li class="c-comment" data-temp-id="${tempId}"`)
+      itemHtml = itemHtml.replace('<li class="c-comment"', `<li class="c-comment" data-temp-id="${tempId}"`)
     }
-    return c.html(html)
+    const countHtml = await renderTemplate("partials/commentsCount.vto", { count: countComments() })
+
+    c.header("HX-Trigger", JSON.stringify({ "comment-added": { author } }))
+    return c.html(itemHtml + countHtml)
   } catch (error) {
     return handleApiError(error, c, { message: "Failed to add comment", responseType: "html" })
+  }
+})
+
+commentsRouter.delete("/comments/:id", async (c) => {
+  try {
+    const id = c.req.param("id")
+    const removed = deleteComment(id)
+    if (!removed) {
+      return c.text("Comment not found", 404)
+    }
+
+    extendLogContext({ operation: "delete_comment", resourceId: id })
+
+    const countHtml = await renderTemplate("partials/commentsCount.vto", { count: countComments() })
+    return c.html(countHtml)
+  } catch (error) {
+    return handleApiError(error, c, { message: "Failed to delete comment", responseType: "html" })
   }
 })

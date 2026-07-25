@@ -1,3 +1,4 @@
+{{ include "./commentsCount.vto" { count: comments.length } |> safe }}
 {{ for comment of comments }}
   {{ include "./commentItem.vto" { comment } |> safe }}
 {{ /for }}
