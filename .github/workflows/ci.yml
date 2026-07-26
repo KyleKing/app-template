@@ -15,7 +15,7 @@ jobs:
     name: Generated output is up to date
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v9.0.0
       - name: Regenerate .ctt/
         run: uvx --from copier-template-tester ctt --continue-on-error
@@ -34,8 +34,8 @@ jobs:
       run:
         working-directory: .ctt/${{ matrix.case }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: jdx/mise-action@v3
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v4
         with:
           working_directory: .ctt/${{ matrix.case }}
 
@@ -62,7 +62,7 @@ jobs:
         run: deno task test:e2e --project=chrome
       - name: Upload test artifacts on failure
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-artifacts-${{ matrix.case }}
           path: |
