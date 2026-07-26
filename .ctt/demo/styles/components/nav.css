@@ -20,7 +20,8 @@
   bottom: -3px;
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, var(--c-accent-line-start), var(--c-accent-line-end));
+  background: linear-gradient(90deg, var(--c-accent-line-start),
+    var(--c-accent-line-end));
   opacity: 0.35;
 }
 .c-nav__list {
@@ -57,10 +58,12 @@
   transform-origin: left center;
   transition: transform 0.35s ease;
 }
-.c-nav__link:hover::before, .c-nav__link:focus-visible::before {
+.c-nav__link:hover::before,
+.c-nav__link:focus-visible::before {
   transform: scaleX(1);
 }
-.c-nav__link:hover, .c-nav__link:focus-visible {
+.c-nav__link:hover,
+.c-nav__link:focus-visible {
   outline: none;
   color: var(--c-link-hover);
 }
