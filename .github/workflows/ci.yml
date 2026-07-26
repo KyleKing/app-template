@@ -36,6 +36,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: jdx/mise-action@v3
+        with:
+          working_directory: .ctt/${{ matrix.case }}
 
       - name: Install dependencies and build assets
         run: |
