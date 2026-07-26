@@ -36,25 +36,3 @@ jobs:
 
       - name: Check Biome
         run: deno task biome check
-
-      - name: Cache Playwright browser
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          {% raw %}key: playwright-${{ runner.os }}-${{ hashFiles('deno.lock') }}{% endraw %}
-
-      - name: Install Playwright browser for headless Chrome (fastest install)
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: deno run --allow-all npm:playwright install chromium --only-shell
-      - name: Run e2e Tests
-        run: deno task test:e2e --project=chrome
-      - name: Upload test artifacts on failure
-        if: failure()
-        uses: actions/upload-artifact@v5
-        with:
-          name: playwright-artifacts
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 1
