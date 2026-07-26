@@ -46,8 +46,8 @@
     </fieldset>
   </form>
 
-  <ol id="comments-list" class="c-comments__list" hx-get="/partials/comments" hx-trigger="load" hx-swap="innerHTML">
-  </ol>
+  <ol id="comments-list" class="c-comments__list" hx-get="/partials/comments" hx-trigger="load"
+    hx-swap="innerHTML"></ol>
 
   <template id="comment-item-template">
     {{ include "../partials/commentItem.vto" { comment: { id: "", author: "", createdAt: "", body: "" } } |> safe }}
@@ -56,90 +56,90 @@
 
 <script type="module" src="./public/shared/commentShape.js"></script>
 <script type="module">
-  import { escapeHtml, generateTempId, shapeCommentInput } from "./public/shared/commentShape.js"
+import { escapeHtml, generateTempId, shapeCommentInput } from "./public/shared/commentShape.js"
 
-  window.clearForm = function clearForm(form) {
-    form.reset()
+window.clearForm = function clearForm(form) {
+  form.reset()
+}
+
+window.optimisticComment = function optimisticComment(form) {
+  const fd = new FormData(form)
+  const shaped = shapeCommentInput(fd)
+  if (!shaped.body) return
+
+  const tempId = generateTempId()
+  const hidden = form.querySelector('input[name="tempId"]')
+  if (hidden) hidden.value = tempId
+
+  const tpl = document.getElementById("comment-item-template")
+  if (!tpl) return
+
+  const list = document.getElementById("comments-list")
+  if (list) {
+    const node = tpl.content.firstElementChild.cloneNode(true)
+    node.classList.add("c-comment--optimistic")
+    node.setAttribute("data-temp-id", tempId)
+    node.querySelector('[data-field="author"]').textContent = escapeHtml(shaped.author)
+    node.querySelector('[data-field="time"]').textContent = "(sending…)"
+    node.querySelector('[data-field="body"]').textContent = escapeHtml(shaped.body)
+    list.prepend(node)
+  }
+}
+
+document.body.addEventListener("htmx:afterSwap", (event) => {
+  if (!event.detail.target || event.detail.target.id !== "comments-list") return
+  event.detail.target.querySelectorAll(".c-comment[data-temp-id]").forEach((comment) => {
+    const tempId = comment.getAttribute("data-temp-id")
+    if (tempId) {
+      const optimistic = document.querySelector(`.c-comment--optimistic[data-temp-id="${tempId}"]`)
+      if (optimistic) optimistic.remove()
+    }
+  })
+})
+
+// Server signals success via the `HX-Trigger` response header rather than the client
+// inferring it from a status code, so other listeners (e.g. analytics) can react too.
+document.body.addEventListener("comment-added", (event) => {
+  const toast = document.getElementById("comment-toast")
+  if (!toast) return
+  toast.textContent = `Comment posted by ${event.detail.author || "Anonymous"}`
+  toast.classList.add("c-comment-toast--visible")
+  setTimeout(() => toast.classList.remove("c-comment-toast--visible"), 2000)
+})
+
+// htmx fires `htmx:confirm` before every request. Intercepting it lets us swap the
+// blocking native `window.confirm()` for an in-place "click again to confirm" arm state,
+// which also keeps delete confirmable via keyboard/screen reader focus alone.
+document.body.addEventListener("htmx:confirm", (event) => {
+  const trigger = event.detail.elt
+  if (!trigger.classList?.contains("c-comment__delete")) return
+  event.preventDefault()
+
+  if (trigger.dataset.armed === "true") {
+    delete trigger.dataset.armed
+    trigger.textContent = "×"
+    trigger.classList.remove("c-comment__delete--armed")
+    event.detail.issueRequest(true)
+    return
   }
 
-  window.optimisticComment = function optimisticComment(form) {
-    const fd = new FormData(form)
-    const shaped = shapeCommentInput(fd)
-    if (!shaped.body) return
+  trigger.dataset.armed = "true"
+  trigger.textContent = trigger.dataset.confirmLabel
+  trigger.classList.add("c-comment__delete--armed")
+  setTimeout(() => {
+    if (trigger.dataset.armed !== "true") return
+    delete trigger.dataset.armed
+    trigger.textContent = "×"
+    trigger.classList.remove("c-comment__delete--armed")
+  }, 3000)
+})
 
-    const tempId = generateTempId()
-    const hidden = form.querySelector('input[name="tempId"]')
-    if (hidden) hidden.value = tempId
-
-    const tpl = document.getElementById("comment-item-template")
-    if (!tpl) return
-
-    const list = document.getElementById("comments-list")
-    if (list) {
-      const node = tpl.content.firstElementChild.cloneNode(true)
-      node.classList.add("c-comment--optimistic")
-      node.setAttribute("data-temp-id", tempId)
-      node.querySelector('[data-field="author"]').textContent = escapeHtml(shaped.author)
-      node.querySelector('[data-field="time"]').textContent = "(sending…)"
-      node.querySelector('[data-field="body"]').textContent = escapeHtml(shaped.body)
-      list.prepend(node)
-    }
+document.getElementById("htmx-debug-toggle")?.addEventListener("change", (event) => {
+  if (!window.htmx) return
+  if (event.target.checked) {
+    window.htmx.logAll()
+  } else {
+    window.htmx.logger = null
   }
-
-  document.body.addEventListener("htmx:afterSwap", (event) => {
-    if (!event.detail.target || event.detail.target.id !== "comments-list") return
-    event.detail.target.querySelectorAll(".c-comment[data-temp-id]").forEach((comment) => {
-      const tempId = comment.getAttribute("data-temp-id")
-      if (tempId) {
-        const optimistic = document.querySelector(`.c-comment--optimistic[data-temp-id="${tempId}"]`)
-        if (optimistic) optimistic.remove()
-      }
-    })
-  })
-
-  // Server signals success via the `HX-Trigger` response header rather than the client
-  // inferring it from a status code, so other listeners (e.g. analytics) can react too.
-  document.body.addEventListener("comment-added", (event) => {
-    const toast = document.getElementById("comment-toast")
-    if (!toast) return
-    toast.textContent = `Comment posted by ${event.detail.author || "Anonymous"}`
-    toast.classList.add("c-comment-toast--visible")
-    setTimeout(() => toast.classList.remove("c-comment-toast--visible"), 2000)
-  })
-
-  // htmx fires `htmx:confirm` before every request. Intercepting it lets us swap the
-  // blocking native `window.confirm()` for an in-place "click again to confirm" arm state,
-  // which also keeps delete confirmable via keyboard/screen reader focus alone.
-  document.body.addEventListener("htmx:confirm", (event) => {
-    const trigger = event.detail.elt
-    if (!trigger.classList?.contains("c-comment__delete")) return
-    event.preventDefault()
-
-    if (trigger.dataset.armed === "true") {
-      delete trigger.dataset.armed
-      trigger.textContent = "×"
-      trigger.classList.remove("c-comment__delete--armed")
-      event.detail.issueRequest(true)
-      return
-    }
-
-    trigger.dataset.armed = "true"
-    trigger.textContent = trigger.dataset.confirmLabel
-    trigger.classList.add("c-comment__delete--armed")
-    setTimeout(() => {
-      if (trigger.dataset.armed !== "true") return
-      delete trigger.dataset.armed
-      trigger.textContent = "×"
-      trigger.classList.remove("c-comment__delete--armed")
-    }, 3000)
-  })
-
-  document.getElementById("htmx-debug-toggle")?.addEventListener("change", (event) => {
-    if (!window.htmx) return
-    if (event.target.checked) {
-      window.htmx.logAll()
-    } else {
-      window.htmx.logger = null
-    }
-  })
+})
 </script>
