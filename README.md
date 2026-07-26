@@ -67,6 +67,21 @@ cd .ctt/demo && mise run build && deno task dev
 
 Both directories are checked by the same [CI workflow](./.github/workflows/ci.yml) that a generated project gets.
 
+## Known gaps
+
+- **CI never runs the Playwright suite.** Both this repo's workflow and the one a generated project gets
+  dropped their e2e step because installing Chromium hung on the runner (see `ci: drop e2e from CI`, and
+  the caching attempt before it). Every generated project therefore ships `tests/e2e/`, a
+  `playwright.config.ts`, and an `hk` hook that runs them locally, while CI does not. Until that is
+  solved, an e2e regression only surfaces on a developer's machine
+- **`copier update` re-seeds the files it promised not to overwrite.** `_skip_if_exists` skips a file
+  that is already present, so a project that deliberately deleted `src/routes.ts` or `src/templates/`
+  gets them back on every update. `tlr` hits this. Fixing it properly means gating those paths on an
+  answer rather than on the file existing
+- **Two tags point at each release.** `0.2.0` and `v0.2.0` both sit on the same commit. Copier picks its
+  target by PEP 440 sort, so this is harmless while the pair stays in sync and confusing the moment one
+  gets bumped without the other. Pick one form
+
 ## Upstreaming improvements from a project
 
 Generated files split in two. Universal scaffolding (`src/app.ts`, `src/utils/`, the build scripts, the hk and CI config) is shared by every project, so an improvement made downstream belongs back in `app_template/`, with any `{{ jinja }}` variables the rendered file had filled in restored. Project-specific content (`README.md`, `src/routes.ts`, pages, nav) stays in the project; those are protected by `_skip_if_exists` and must not be pushed into the template.
