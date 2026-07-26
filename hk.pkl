@@ -1,34 +1,13 @@
-amends "package://github.com/jdx/hk/releases/download/v1.2.0/hk@1.2.0#/Config.pkl"
+amends "package://github.com/jdx/hk/releases/download/v1.53.0/hk@1.53.0#/Config.pkl"
 
 hooks {
     ["pre-commit"] {
         fix = true
         steps {
-            ["bench"] {
-                glob = "*_bench.ts"
-                check = "deno task bench"
-            }
-            ["biome"] {
-                glob = "*.ts"
-                check = "deno task biome check {{files}}"
-                fix = "deno task biome check --write {{files}}"
-            }
-            ["check"] {
-                glob = "*.ts"
-                check = "deno check"
-            }
-            ["fmt"] {
-                check = "deno task fmt --check {{files}}"
-                fix = "deno task fmt {{files}}"
-            }
-            ["test"] {
-                glob = "*_test.ts"
-                check = "deno task test"
-            }
-            ["test:e2e"] {
-                glob = "*.ts"
-                check = "deno task test:e2e --project=chrome"
-                // profiles = "slow")
+            // Regenerates .ctt/ so an out-of-date generated project fails the commit
+            ["ctt"] {
+                glob = List("app_template/**", "copier.yml", "ctt.toml")
+                check = "mise run ctt"
             }
         }
     }

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/public/styles.min.css">
+    <script src="/public/htmx.min.js"></script>
+  </head>
+  <body class="c-page c-layout">
+    <header class="c-page__header c-layout__header">
+      <div class="c-main c-header__inner">
+        {{ include "../partials/nav.vto" |> safe }}
+      </div>
+    </header>
+
+    <main class="c-main c-main__content c-layout__main" id="main-content" tabindex="-1">
+      {{ content |> safe }}
+    </main>
+
+    <footer class="c-page__footer c-layout__footer">
+      <div class="c-main c-footer__inner">
+        <p class="c-footer__text">
+          Made with Deno + Hono.js + Vento + HTMX + More ✨
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

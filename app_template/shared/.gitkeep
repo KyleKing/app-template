@@ -1,0 +1,3 @@
+# Isomorphic modules shared between the server and the browser.
+# Every `*.ts` here (except `_test.ts` / `_bench.ts`) is transpiled into `public/shared/` by
+# `scripts/build-shared.ts`, so it must not import server-only APIs.

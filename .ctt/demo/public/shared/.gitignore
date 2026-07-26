@@ -1,0 +1,2 @@
+# Directory contains files built with ./build-shared.ts
+*.js

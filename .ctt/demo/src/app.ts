@@ -1,0 +1,94 @@
+import { api } from "@/api.ts"
+import { extendLogContext, getLogContext, initializeContext } from "@/logContext.ts"
+import { registerRoutes } from "@/routes.ts"
+import { getEnvConfig } from "@/utils/env.ts"
+import { handleApiError } from "@/utils/errorHandler.ts"
+import { configure, getConsoleSink, getLogger } from "@logtape/logtape"
+import { Hono } from "hono"
+import { serveStatic } from "hono/deno"
+
+await configure({
+  sinks: {
+    console: getConsoleSink({
+      formatter: (record) => {
+        const logEntry = {
+          timestamp: new Date(record.timestamp).toISOString(),
+          level: record.level,
+          category: record.category,
+          message: record.message,
+          ...record.properties,
+          ...(getLogContext() || {}),
+        }
+        return JSON.stringify(logEntry)
+      },
+    }),
+  },
+  loggers: [
+    { category: ["app"], sinks: ["console"], lowestLevel: getEnvConfig().LOG_LEVEL },
+    { category: ["logtape", "meta"], sinks: ["console"], lowestLevel: "warning" },
+  ],
+})
+
+const app = new Hono()
+const logger = getLogger(["app"])
+
+app.use("*", async (c, next) => {
+  const startTime = performance.now()
+
+  await initializeContext(
+    async () => {
+      extendLogContext({
+        host: c.req.header("Host"),
+        ipAddress: c.req.header("X-Forwarded-For"),
+        method: c.req.method,
+        path: c.req.path,
+        referer: c.req.header("Referer"),
+        requestId: crypto.randomUUID(),
+        url: c.req.url,
+        contentType: c.req.header("Content-Type"),
+        userAgent: c.req.header("User-Agent"),
+        acceptLanguage: c.req.header("Accept-Language"),
+        origin: c.req.header("Origin"),
+        xForwardedProto: c.req.header("X-Forwarded-Proto"),
+        requestSize: c.req.header("Content-Length"),
+      })
+
+      await next()
+
+      extendLogContext({
+        status: c.res.status,
+        duration: performance.now() - startTime,
+        // PLANNED: responseSize: c.res.headers.get("Content-Length"),
+        responseContentType: c.res.headers.get("Content-Type"),
+      })
+
+      if (c.res.status >= 500) {
+        logger.error("Request completed")
+      } else if (c.res.status >= 400) {
+        logger.warning("Request completed")
+      } else {
+        logger.info("Request completed")
+      }
+    },
+  )
+})
+
+app.onError((err, c) => {
+  return handleApiError(err, c, { message: "Request error" })
+})
+
+app.route("/iapi", api)
+
+app.get(
+  "/public/*",
+  serveStatic({
+    // PLANNED: Revisit support of compression: https://docs.deno.com/deploy/api/compression
+    // precompressed: true,
+    root: "./",
+  }),
+)
+
+// Registered last so project routes never shadow `/iapi` or `/public`
+registerRoutes(app)
+
+export { app }

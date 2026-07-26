@@ -11,30 +11,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ctt:
-    name: Generated output is up to date
+  ci:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v8
-      - name: Regenerate .ctt/
-        run: uvx --from copier-template-tester ctt --continue-on-error
-      - name: Fail if generated output drifted from the template
-        run: git diff --exit-code -- .ctt
 
-  generated:
-    name: ${{ matrix.case }}
-    runs-on: ubuntu-latest
-    needs: ctt
-    strategy:
-      fail-fast: false
-      matrix:
-        case: [default, demo]
-    defaults:
-      run:
-        working-directory: .ctt/${{ matrix.case }}
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout code
+        uses: actions/checkout@v5
+
       - uses: jdx/mise-action@v3
 
       - name: Install dependencies and build assets
@@ -62,8 +45,8 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v5
         with:
-          name: playwright-artifacts-${{ matrix.case }}
+          name: playwright-artifacts
           path: |
-            .ctt/${{ matrix.case }}/playwright-report/
-            .ctt/${{ matrix.case }}/test-results/
+            playwright-report/
+            test-results/
           retention-days: 1
