@@ -5,7 +5,7 @@ Date: 2026-07-25
 
 ## Problem
 
-The demo (`src/templates/pages/comments.vto`) uses htmx 2.0.x for AJAX interactivity, pinned via `scripts/download-assets.sh`. The repo is moving toward a copier template with the demo split into its own directory, and dependencies are getting a general upgrade pass. That's a good point to record why htmx is the reference pattern here, and whether an alternative fits the "no framework" goal better, rather than carry the choice forward implicitly.
+The demo (`.ctt/demo/src/templates/pages/comments.vto`) uses htmx 2.0.x for AJAX interactivity, pinned via `scripts/download-assets.sh`. The repo is moving toward a copier template with the demo split into its own directory, and dependencies are getting a general upgrade pass. That's a good point to record why htmx is the reference pattern here, and whether an alternative fits the "no framework" goal better, rather than carry the choice forward implicitly.
 
 Two references prompted this: the [htmx tricks chapter](https://hypermedia.systems/tricks-of-the-htmx-masters) from _Hypermedia Systems_, and the [Datastar getting started guide](https://data-star.dev/guide/getting_started#data-on).
 
