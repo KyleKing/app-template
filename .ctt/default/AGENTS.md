@@ -22,4 +22,6 @@ Run `deno task check` and `deno task test` before reporting work as done.
 - Accessibility is tested, not asserted: axe-core runs against `wcag2aa` plus `color-contrast` in the e2e suite
 - Deno permissions are explicit in each task; do not broaden them without need
 
-A directory may add its own `AGENTS.md` to extend or override this file for the code under it. Template updates never overwrite any `AGENTS.md`.
+This file is template-owned and `copier update` keeps it current. Put project-specific guidance in `AGENTS.local.md` (loaded below when present) or in a nested `AGENTS.md` scoped to its directory.
+
+@AGENTS.local.md
