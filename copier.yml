@@ -5,6 +5,8 @@ _min_copier_version: 9.0.0
 _answers_file: .copier-answers.yml
 _subdirectory: app_template
 _skip_if_exists:
+  - AGENTS.md
+  - "**/AGENTS.md"
   - README.md
   - src/routes.ts
   - src/templates/pages/home.vto
