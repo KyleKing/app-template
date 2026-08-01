@@ -15,9 +15,11 @@ repository_provider = "https://github.com"
 [output.".ctt/default"]
 project_name = "test-template"
 
-# The same scaffolding with the htmx comments demo committed on top. ctt renders the template
-# over this directory without deleting files the template does not emit, and the four paths in
-# `_skip_if_exists` let the demo keep its own routes, nav, home page, and README.
+# The same scaffolding with the htmx comments demo committed on top. `_keep_output` stops ctt
+# from emptying this directory, so the template renders over the demo without deleting files it
+# does not emit, and the four paths in `_skip_if_exists` let the demo keep its own routes, nav,
+# home page, and README.
 [output.".ctt/demo"]
+_keep_output = true
 project_name = "app-template-demo"
 project_description = "Deno + Hono + Vento + htmx demo for app-template"
