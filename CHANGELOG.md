@@ -1,3 +1,9 @@
+## v0.2.1 (2026-08-01)
+
+### Fix
+
+- **ctt**: keep the demo output dir, ctt 3.0.0 now empties it
+
 ## v0.2.0 (2026-07-26)
 
 ### Feat
