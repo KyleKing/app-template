@@ -1,3 +1,12 @@
+## v0.3.0 (2026-08-31)
+
+### Feat
+
+- **ci**: track tool and action pins with doneram
+- **ci**: serialize Bump Version and guard the no-release case
+- template-owned AGENTS.md with AGENTS.local.md for project guidance
+- ship AGENTS.md with CLAUDE.md pointer, preserve per-directory AGENTS.md
+
 ## v0.2.1 (2026-08-01)
 
 ### Fix
