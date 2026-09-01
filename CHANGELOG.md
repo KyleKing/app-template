@@ -1,3 +1,9 @@
+## v0.4.0 (2026-09-01)
+
+### Feat
+
+- **doneram**: install the pinned release, pin the dev tools, drop Dependabot
+
 ## v0.3.0 (2026-08-31)
 
 ### Feat
