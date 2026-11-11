@@ -1,7 +1,7 @@
 // Tool and GitHub Action versions shipped to generated projects. Each one is a
 // literal in the file that consumes it. This file records where those literals
-// are and how to resolve the latest value. deno and pkl are absent on purpose,
-// because they track "latest" rather than a pinned literal.
+// are and how to resolve the latest value. pkl in generated projects is absent on purpose,
+// because it tracks "latest" rather than a pinned literal.
 //
 // A site that matches a different number of times than `expect` fails the run.
 // A pattern that silently stops matching is how a pin goes stale unnoticed.

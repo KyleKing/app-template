@@ -22,7 +22,7 @@ Start from a clean tree on a branch.
 
     The demo produced no `.rej` files. Copier deleted `deno.json` and `deno.lock` because the project had not edited them, and wrote `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `scripts/bench.ts`, and `scripts/compile.ts`. The demo never edited `deno.json`. A project that did has dependencies and tasks that must move to `package.json` by hand, and copier will probably leave a `.rej` for the deleted file
 
-1. Install the pinned tools (`node` 26 and `pnpm` 11)
+1. Install the pinned tools (`node` 26 and `pnpm` 12)
 
     ```sh
     mise install
@@ -101,7 +101,7 @@ The assertion rewrite follows this map. `assertEquals` becomes `deepEqual` becau
 | `jsr:@logtape/logtape` | `@logtape/logtape` from npm |
 | `deno run npm:playwright test` | `playwright test` |
 | `deno compile` | `scripts/compile.ts` (see below) |
-| `deno = "latest"` in mise | `node = "26"` and `pnpm = "11"` |
+| `deno = "latest"` in mise | `node = "26"` and `pnpm = "12"` |
 
 ### The compiled binary
 
@@ -132,17 +132,17 @@ Each was run against the Node 26.13.1 spike and the demo.
 1. `tinybench` covers what the `*_bench.ts` files measured. Yes for the four existing benches, which ran unchanged apart from the API. The table prints latency average and median, throughput, and sample count. Deno's output also had min, max, p75, and p99, which `tinybench` keeps on `task.result` but omits from `table()`. Node has no bench command, so `scripts/bench.ts` globs `*_bench.ts` and imports each, and each bench file runs when imported
 1. The `--allow-*` mapping. See the table above. Two flags (`--allow-env`, `--allow-sys`) have no Node equivalent
 1. Biome and dprint agree on every file type once `deno fmt` is gone. Yes after two config changes, and the demo passes both. Biome's formatter is disabled, so the two cannot disagree on formatting and only share `.ts` files for linting and formatting. The changes
-    - dprint's TypeScript plugin needs `quoteStyle: "preferDouble"` and `semiColons: "asi"` to match `deno fmt` (`alwaysDouble` escaped quotes inside the demo's inline scripts)
+    - dprint's TypeScript plugin needs `quoteStyle: "preferDouble"` and `semicolons: "asi"` (the key was `semiColons` before plugin 0.99, and an unknown key stops the whole plugin from loading) to match `deno fmt` (`alwaysDouble` escaped quotes inside the demo's inline scripts)
     - dprint's markup plugin formats `.vto` files, which `deno fmt` never touched, and rewrapped two Vento templates in the demo. `dprint.json` excludes `**/*.vto`
 
     The rest of dprint's output differed from `deno fmt` in two spots in the default project (a CSS gradient and a long template literal), and the template now carries the dprint form
 
 ## Tools that behave differently
 
-- `hk check --all` failed on the Deno template too (`Hook 'check' not found`) because `hk.pkl` only defined `pre-commit`. It now defines both hooks from one `checks` mapping. A mapping named `steps` shadows the hook's own `steps` property and overflows pkl's stack, so keep the name `checks`
+- `hk check --all` failed on the Deno template too (`Hook 'check' not found`) because `hk.pkl` only defined `pre-commit`. The template now targets hk 2, where one top-level `steps` block defines the `check`, `fix`, and `pre-commit` hooks together. hk 2 also stops invoking the `pkl` CLI and stages fixes only in `pre-commit`
 - hk runs from the git root. Inside `.ctt/*`, which has no repository of its own, pnpm ran in `app-template/` and then climbed to `~/package.json`. The root README shows a throwaway `git init` for running a case
 - `typescript@latest` is 7.x, the native port, which has no `transpileModule`. The template pins `typescript@^6` for both `tsc` and `scripts/build-shared.ts`. Drop the pin when TypeScript 7 ships a JavaScript transpile API
-- pnpm 11 refuses releases less than a day old (`minimumReleaseAge`) and blocks dependency build scripts. `pnpm-workspace.yaml` lists `dprint: true` and `esbuild: false` under `allowBuilds`, and the template uses caret ranges so the lockfile resolves a release old enough
+- pnpm 11 and 12 refuse releases less than a day old (`minimumReleaseAge`) and blocks dependency build scripts. `pnpm-workspace.yaml` lists `dprint: true` and `esbuild: false` under `allowBuilds`, and the template uses caret ranges so the lockfile resolves a release old enough. pnpm 12 also prints `Agent skills awaiting approval` for `@logtape/logtape` after install, which does not fail the install
 - `biome migrate --write` from 2.2.4 wrote invalid globs (`!!**/**/node_modules/**`) and switched the file to tabs. The template's `biome.json` is written by hand for 2.6
 - `deno lint` was configured in `deno.json` but no hk step, task, or CI step ran it, so no lint check disappears. On the old demo it reported 9 problems (6 `no-explicit-any`, 2 `no-window`, 1 `require-await`). Recommended Deno rules with no recommended Biome rule are `no-deprecated-deno-api`, `no-sloppy-imports`, `no-unversioned-import`, `no-window`, `no-window-prefix`, `no-await-in-sync-fn`, `require-await`, and the `ban-*-ignore` rules. Most only apply to Deno or are covered by `tsc`. Biome's `suspicious/useAwait` is the `require-await` counterpart and is off by default (verified: it flags `async (c) => c.json(...)`)
 - `mise run build --minify` still reaches `build-css`. mise skips a task whose `sources` are unchanged, so rebuilding after a non-minified build needs `--force`

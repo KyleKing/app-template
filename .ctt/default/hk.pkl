@@ -1,6 +1,6 @@
-amends "package://github.com/jdx/hk/releases/download/v1.53.0/hk@1.53.0#/Config.pkl"
+amends "package://github.com/jdx/hk/releases/download/v2.12.0/hk@2.12.0#/Config.pkl"
 
-local checks = new Mapping<String, Step> {
+steps {
     ["bench"] {
         glob = "*_bench.ts"
         check = "pnpm bench"
@@ -26,15 +26,5 @@ local checks = new Mapping<String, Step> {
         glob = "*.ts"
         check = "pnpm test:e2e --project=chrome"
         // profiles = "slow")
-    }
-}
-
-hooks {
-    ["check"] {
-        steps = checks
-    }
-    ["pre-commit"] {
-        fix = true
-        steps = checks
     }
 }

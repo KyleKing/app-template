@@ -81,5 +81,5 @@ copyright_date:
 hk_version:
   type: str
   help: hk git-hooks framework version pinned in hk.pkl and mise
-  default: "1.53.0"
+  default: "2.12.0"
   when: false

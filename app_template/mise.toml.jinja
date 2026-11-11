@@ -2,11 +2,11 @@
 hk = "{{ hk_version }}"
 node = "26"
 pkl = "latest"
-pnpm = "11"
+pnpm = "12"
 
 [tasks.build]
-description = 'Build generated code'
-depends = ['build-css', 'build-shared', 'download-assets']
+description = "Build generated code"
+depends = ["build-css", "build-shared", "download-assets"]
 
 [tasks.build-css]
 description = "Build CSS from styles directory. Optionally compress with `--minify`"
