@@ -1,9 +1,10 @@
 import { mkdir, readdir, readFile, watch, writeFile } from "node:fs/promises"
+import { stripTypeScriptTypes } from "node:module"
 import { join } from "node:path"
-import ts from "typescript"
 
 const sharedDir = join(process.cwd(), "shared")
 const outDir = join(process.cwd(), "public", "shared")
+const RELATIVE_TS_IMPORT = /(\b(?:from\s*|import\s*\(\s*)["'][^"'\n]+)\.ts(["'])/g
 
 // Every `shared/*.ts` module is isomorphic by convention and shipped to the browser, so the
 // list is derived rather than maintained. Tests and benchmarks stay server-side.
@@ -22,15 +23,7 @@ async function buildClient() {
 
   for (const tsFile of await collectClientFiles()) {
     const source = await readFile(join(sharedDir, tsFile), "utf8")
-    const { outputText } = ts.transpileModule(source, {
-      fileName: tsFile,
-      compilerOptions: {
-        module: ts.ModuleKind.ESNext,
-        rewriteRelativeImportExtensions: true,
-        target: ts.ScriptTarget.ES2022,
-        verbatimModuleSyntax: true,
-      },
-    })
+    const outputText = stripTypeScriptTypes(source).replace(RELATIVE_TS_IMPORT, "$1.js$2")
     await writeFile(join(outDir, tsFile.replace(/\.ts$/, ".js")), outputText)
   }
 }

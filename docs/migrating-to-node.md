@@ -107,7 +107,7 @@ It then passed `hk check --all`, with 21 unit tests and the chrome e2e project.
 | `deno check` | `tsc --noEmit` |
 | `deno fmt` | dprint |
 | `deno lint` | Biome |
-| `@deno/emit` | `typescript` `transpileModule` with `rewriteRelativeImportExtensions` |
+| `@deno/emit` | `node:module` `stripTypeScriptTypes`, with relative `.ts` imports rewritten to `.js` |
 | `Deno.env.get`, `Deno.args`, `Deno.cwd` | `process.env`, `process.argv`, `process.cwd()` |
 | `Deno.readDir`, `readTextFile`, `writeTextFile`, `mkdir`, `remove` | `readdir`, `readFile`, `writeFile`, `mkdir`, `rm` from `node:fs/promises` |
 | `Deno.watchFs` | `watch` from `node:fs/promises` |
@@ -156,7 +156,7 @@ Each was run against the Node 26.13.1 spike and the demo.
 
 - `hk check --all` failed on the Deno template too (`Hook 'check' not found`) because `hk.pkl` only defined `pre-commit`. The template now targets hk 2, where one top-level `steps` block defines the `check`, `fix`, and `pre-commit` hooks together. hk 2 also stops invoking the `pkl` CLI and stages fixes only in `pre-commit`
 - hk runs from the git root. Inside `.ctt/*`, which has no repository of its own, pnpm ran in `app-template/` and then climbed to `~/package.json`. The root README shows a throwaway `git init` for running a case
-- `typescript@latest` is 7.x, the native port, which has no `transpileModule`. The template pins `typescript@^6` for both `tsc` and `scripts/build-shared.ts`. Drop the pin when TypeScript 7 ships a JavaScript transpile API
+- `typescript@7` is the native port and has no `transpileModule`, so `scripts/build-shared.ts` strips types with `node:module` `stripTypeScriptTypes` and TypeScript only runs `tsc --noEmit`. Having `tsc` emit `shared/` instead fails with TS18003 on the empty directory a new project starts with. The JavaScript API returns in TypeScript 7.1 (beta), tracked in [ROADMAP.md](../ROADMAP.md)
 - pnpm 11 and 12 refuse releases less than a day old (`minimumReleaseAge`) and blocks dependency build scripts. `pnpm-workspace.yaml` lists `dprint: true` and `esbuild: false` under `allowBuilds`, and the template uses caret ranges so the lockfile resolves a release old enough. pnpm 12 also prints `Agent skills awaiting approval` for `@logtape/logtape` after install, which does not fail the install
 - `biome migrate --write` from 2.2.4 wrote invalid globs (`!!**/**/node_modules/**`) and switched the file to tabs. The template's `biome.json` is written by hand for 2.6
 - `deno lint` was configured in `deno.json` but no hk step, task, or CI step ran it, so no lint check disappears. On the old demo it reported 9 problems (6 `no-explicit-any`, 2 `no-window`, 1 `require-await`). Recommended Deno rules with no recommended Biome rule are `no-deprecated-deno-api`, `no-sloppy-imports`, `no-unversioned-import`, `no-window`, `no-window-prefix`, `no-await-in-sync-fn`, `require-await`, and the `ban-*-ignore` rules. Most only apply to Deno or are covered by `tsc`. Biome's `suspicious/useAwait` is the `require-await` counterpart and is off by default (verified: it flags `async (c) => c.json(...)`)

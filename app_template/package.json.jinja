@@ -11,7 +11,7 @@
     "bench": "LOG_LEVEL=error node scripts/bench.ts",
     "biome": "biome",
     "build:css": "node scripts/build-css.ts",
-    "build:shared": "node scripts/build-shared.ts",
+    "build:shared": "node --disable-warning=ExperimentalWarning scripts/build-shared.ts",
     "check": "tsc --noEmit",
     "compile": "node scripts/compile.ts",
     "dev": "node --permission --allow-fs-read=. --allow-net scripts/app-server.ts",
@@ -39,7 +39,7 @@
     "dprint": "^0.64.3",
     "esbuild": "^0.28.2",
     "tinybench": "^6.2.3",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=26"
