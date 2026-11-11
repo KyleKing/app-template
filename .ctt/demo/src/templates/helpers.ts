@@ -1,4 +1,4 @@
-import { renderTemplate } from "@/templates/engine.ts"
+import { renderTemplate } from "#src/templates/engine.ts"
 import type { Context } from "hono"
 
 export async function renderPage(

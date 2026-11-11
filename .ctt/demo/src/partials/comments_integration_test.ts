@@ -1,6 +1,6 @@
-import { app } from "@/app.ts"
-import { assertEquals, assertStringIncludes } from "@std/assert"
-import { spy } from "@std/testing/mock"
+import { mock, test } from "node:test"
+import { app } from "#src/app.ts"
+import assert from "node:assert/strict"
 import { z } from "zod"
 
 const logEntrySchema = z.object({
@@ -20,14 +20,14 @@ const logEntrySchema = z.object({
 })
 
 async function captureStdout(testFn: () => Promise<void>): Promise<string[]> {
-  const consoleLogSpy = spy(console, "info")
+  const consoleLogSpy = mock.method(console, "info")
 
   await testFn()
 
-  const capturedLogs = consoleLogSpy.calls.map((call) =>
-    call.args.map((arg: unknown) => typeof arg === "string" ? arg : JSON.stringify(arg)).join(" ")
+  const capturedLogs = consoleLogSpy.mock.calls.map((call) =>
+    call.arguments.map((arg: unknown) => typeof arg === "string" ? arg : JSON.stringify(arg)).join(" ")
   )
-  consoleLogSpy.restore()
+  consoleLogSpy.mock.restore()
 
   return capturedLogs
 }
@@ -44,18 +44,18 @@ function validateLogs(logs: string[]) {
   }
 }
 
-Deno.test("GET /public/shared/commentShape.js returns module with cache headers", async () => {
+test("GET /public/shared/commentShape.js returns module with cache headers", async () => {
   const logs = await captureStdout(async () => {
     const res = await app.fetch(new Request("http://localhost/public/shared/commentShape.js"))
     await res.text() // Prevent file handler leaks
 
-    assertEquals(res.status, 200)
-    assertEquals(res.headers.get("Content-Type"), "text/javascript; charset=utf-8")
+    assert.deepEqual(res.status, 200)
+    assert.deepEqual(res.headers.get("Content-Type"), "text/javascript; charset=utf-8")
   })
   validateLogs(logs)
 })
 
-Deno.test("POST /partials/comments adds comment and echoes tempId attribute", async () => {
+test("POST /partials/comments adds comment and echoes tempId attribute", async () => {
   const logs = await captureStdout(async () => {
     const form = new FormData()
     form.set("author", "Tester")
@@ -66,9 +66,9 @@ Deno.test("POST /partials/comments adds comment and echoes tempId attribute", as
     const res = await app.fetch(req)
     const html = await res.text()
 
-    assertEquals(res.status, 200)
-    assertStringIncludes(html, 'data-temp-id="temp-abc123"')
-    assertStringIncludes(html, "Integration Comment")
+    assert.deepEqual(res.status, 200)
+    assert.ok(html.includes('data-temp-id="temp-abc123"'))
+    assert.ok(html.includes("Integration Comment"))
   })
   validateLogs(logs)
 })

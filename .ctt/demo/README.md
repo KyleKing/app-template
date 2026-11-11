@@ -8,9 +8,9 @@ Everything here except the files listed under [Demo-only files](#demo-only-files
 
 ```sh
 mise install
-deno install
+pnpm install
 mise run build
-deno task dev # http://localhost:8080
+pnpm dev # http://localhost:8080
 ```
 
 ## Screenshots

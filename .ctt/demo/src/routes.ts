@@ -1,8 +1,8 @@
-import { commentsRouter } from "@/partials/commentsRouter.ts"
-import { renderPage } from "@/templates/helpers.ts"
-import { handleApiError } from "@/utils/errorHandler.ts"
+import { commentsRouter } from "#src/partials/commentsRouter.ts"
+import { renderPage } from "#src/templates/helpers.ts"
+import { handleApiError } from "#src/utils/errorHandler.ts"
 import type { Hono } from "hono"
-import { MAX_AUTHOR_LEN, MAX_BODY_LEN } from "~/commentShape.ts"
+import { MAX_AUTHOR_LEN, MAX_BODY_LEN } from "#shared/commentShape.ts"
 
 export function registerRoutes(app: Hono) {
   app.route("/partials", commentsRouter)

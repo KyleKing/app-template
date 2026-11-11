@@ -1,12 +1,18 @@
 {
+  "lineWidth": 120,
+  "indentWidth": 2,
+  "useTabs": false,
   "biome": {
   },
   "typescript": {
-    "module.sortImportDeclarations": "maintain"
+    "module.sortImportDeclarations": "maintain",
+    "quoteStyle": "preferDouble",
+    "semiColons": "asi"
   },
   "json": {
   },
   "markdown": {
+    "textWrap": "maintain"
   },
   "toml": {
   },
@@ -17,8 +23,16 @@
   "yaml": {
   },
   "excludes": [
+    "**/*-lock.yaml",
+    "**/*.min.js",
+    "**/*.vto",
     "**/node_modules",
-    "**/*-lock.json"
+    ".copier-answers.yml",
+    "coverage",
+    "dist",
+    "playwright-report",
+    "public",
+    "test-results"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.95.11.wasm",

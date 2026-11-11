@@ -29,7 +29,7 @@ test("comment demo works", async ({ page, browserName }) => {
   await expect(optimisticComment.locator('[data-field="time"]')).toContainText("(sending…)")
   await page.waitForSelector(".c-comment--optimistic", { state: "detached" })
 
-  if (browserName === "firefox") { // Deterministically generate with `deno task test:e2e --project=firefox`
+  if (browserName === "firefox") { // Deterministically generate with `pnpm test:e2e --project=firefox`
     await page.setViewportSize({ width: 800, height: 1000 })
     await page.screenshot({ path: ".github/screenshots/comments-sending.png" })
   }

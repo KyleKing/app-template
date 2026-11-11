@@ -1,5 +1,6 @@
-import { app } from "@/app.ts"
-import { assertEquals } from "@std/assert"
+import assert from "node:assert/strict"
+import { test } from "node:test"
+import { app } from "#src/app.ts"
 
 interface AppTestParams {
   name: string
@@ -16,7 +17,7 @@ interface RequestOptions {
 }
 
 function runAppTest(params: AppTestParams) {
-  Deno.test(params.name, async () => {
+  test(params.name, async () => {
     const requestOptions: RequestOptions = { method: params.method }
     if (params.headers) {
       requestOptions.headers = params.headers
@@ -25,9 +26,9 @@ function runAppTest(params: AppTestParams) {
     const response = await app.request(params.url, requestOptions)
     const responseText = await response.text() // prevent leaks even if not tested
 
-    assertEquals(response.status, params.expectedStatus)
+    assert.equal(response.status, params.expectedStatus)
     if (params.expectedContent) {
-      assertEquals(responseText, params.expectedContent)
+      assert.equal(responseText, params.expectedContent)
     }
   })
 }

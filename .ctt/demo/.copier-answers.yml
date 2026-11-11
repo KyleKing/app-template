@@ -1,12 +1,12 @@
 # Changes here will be overwritten by Copier
-_commit: v0.4.1
-_src_path: /Users/kyleking/Developer/kyleking/app-template
+_commit: HEAD
+_src_path: ../../app-template
 author_email: ctt@ctt.ctt
 author_name: Carl The Template
 author_username: user_ctt
 copyright_date: '2026'
 development_branch: main
-project_description: Deno + Hono + Vento + htmx demo for app-template
+project_description: Node + Hono + Vento + htmx demo for app-template
 project_name: app-template-demo
 repository_namespace: user_ctt
 repository_provider: https://github.com

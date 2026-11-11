@@ -1,9 +1,9 @@
-import { extendLogContext } from "@/logContext.ts"
-import { addComment, countComments, deleteComment, listComments } from "@/partials/commentsStore.ts"
-import { renderTemplate } from "@/templates/engine.ts"
-import { handleApiError } from "@/utils/errorHandler.ts"
+import { extendLogContext } from "#src/logContext.ts"
+import { addComment, countComments, deleteComment, listComments } from "#src/partials/commentsStore.ts"
+import { renderTemplate } from "#src/templates/engine.ts"
+import { handleApiError } from "#src/utils/errorHandler.ts"
 import { Hono } from "hono"
-import { shapeCommentInput } from "~/commentShape.ts"
+import { shapeCommentInput } from "#shared/commentShape.ts"
 
 export const commentsRouter = new Hono()
 

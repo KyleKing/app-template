@@ -1,6 +1,7 @@
+import assert from "node:assert/strict"
+import { test } from "node:test"
 import type { Context } from "hono"
-import { handleApiError } from "@/utils/errorHandler.ts"
-import { assertEquals } from "@std/assert"
+import { handleApiError } from "#src/utils/errorHandler.ts"
 
 // Mock Context
 class MockContext {
@@ -35,7 +36,7 @@ class MockContext {
   }
 }
 
-Deno.test("handleApiError - JSON response for API paths", async () => {
+test("handleApiError - JSON response for API paths", async () => {
   const error = new Error("Test error")
   const c = new MockContext("/iapi/test")
 
@@ -44,13 +45,13 @@ Deno.test("handleApiError - JSON response for API paths", async () => {
     statusCode: 400,
   })
 
-  assertEquals(response.status, 400)
+  assert.equal(response.status, 400)
   const data = await response.json()
-  assertEquals(data.error, "Custom message")
-  assertEquals(data.details, "Test error")
+  assert.equal(data.error, "Custom message")
+  assert.equal(data.details, "Test error")
 })
 
-Deno.test("handleApiError - HTML response for non-API paths", async () => {
+test("handleApiError - HTML response for non-API paths", async () => {
   const error = new Error("Test error")
   const c = new MockContext("/page")
 
@@ -59,13 +60,13 @@ Deno.test("handleApiError - HTML response for non-API paths", async () => {
     statusCode: 500,
   })
 
-  assertEquals(response.status, 500)
+  assert.equal(response.status, 500)
   const html = await response.text()
-  assertEquals(html.includes("Error"), true)
-  assertEquals(html.includes("Test error"), true)
+  assert.equal(html.includes("Error"), true)
+  assert.equal(html.includes("Test error"), true)
 })
 
-Deno.test("handleApiError - Text response type", async () => {
+test("handleApiError - Text response type", async () => {
   const error = new Error("Test error")
   const c = new MockContext("/iapi/test")
 
@@ -75,19 +76,19 @@ Deno.test("handleApiError - Text response type", async () => {
     responseType: "text",
   })
 
-  assertEquals(response.status, 404)
+  assert.equal(response.status, 404)
   const text = await response.text()
-  assertEquals(text, "Custom message: Test error")
+  assert.equal(text, "Custom message: Test error")
 })
 
-Deno.test("handleApiError - Default values", async () => {
+test("handleApiError - Default values", async () => {
   const error = new Error("Test error")
   const c = new MockContext("/iapi/test")
 
   const response = handleApiError(error, c as unknown as Context)
 
-  assertEquals(response.status, 500)
+  assert.equal(response.status, 500)
   const data = await response.json()
-  assertEquals(data.error, "An error occurred")
-  assertEquals(data.details, "Test error")
+  assert.equal(data.error, "An error occurred")
+  assert.equal(data.details, "Test error")
 })
