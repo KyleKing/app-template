@@ -18,10 +18,10 @@ _message_after_copy: |
 
   1. Review the changes and commit
   2. Install tools: `mise install`
-  3. Install dependencies: `deno install`
+  3. Install dependencies: `pnpm install`
   4. Install git hooks: `hk install`
-  5. Install browsers for e2e tests: `deno task test:e2e:install`
-  6. Build assets and run: `mise run build && deno task dev`
+  5. Install browsers for e2e tests: `pnpm test:e2e:install`
+  6. Build assets and run: `mise run build && pnpm dev`
   7. If this is a new project, create the GitHub repo:
 
       ```sh

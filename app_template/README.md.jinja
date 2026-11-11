@@ -2,15 +2,15 @@
 
 {{ project_description }}
 
-A Deno web application built with Hono (routing), Vento (server-rendered templates), and htmx (interactivity), with shared TypeScript between server and browser and plain CSS without a framework.
+A Node web application built with Hono (routing), Vento (server-rendered templates), and htmx (interactivity), with shared TypeScript between server and browser and plain CSS without a framework.
 
 ## Setup
 
 ```sh
 mise install
-deno install
+pnpm install
 hk install
-deno task test:e2e:install
+pnpm test:e2e:install
 mise run build
 ```
 
@@ -20,7 +20,7 @@ mise run build
 mise watch build # Keeps built files up to date
 mise watch dev --restart |& tail-jsonl # Hot reloads on TS changes, while mise watches .vto. Optionally run with `pipx:tail-jsonl`
 
-deno task test:watch
+pnpm test:watch
 
 hk run pre-commit --all
 ```
@@ -28,7 +28,7 @@ hk run pre-commit --all
 ## Production
 
 ```sh
-deno task prod # Serves production app from built executable
+pnpm prod # Serves production app from the built single executable
 ```
 
 ## Layout

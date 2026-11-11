@@ -1,7 +1,8 @@
-import { join, relative } from "@std/path"
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises"
+import { join, relative } from "node:path"
 
-const stylesDir = join(Deno.cwd(), "styles")
-const publicDir = join(Deno.cwd(), "public")
+const stylesDir = join(process.cwd(), "styles")
+const publicDir = join(process.cwd(), "public")
 
 // Cascade order: tokens define the custom properties everything else reads, base sets the
 // element defaults, then components layer on top. Anything unlisted is appended alphabetically
@@ -10,14 +11,14 @@ const leadingFiles = ["tokens.css", "base.css"]
 
 async function collectStyles(): Promise<string[]> {
   const found: string[] = []
-  for await (const entry of Deno.readDir(stylesDir)) {
-    if (entry.isDirectory) {
-      for await (const nested of Deno.readDir(join(stylesDir, entry.name))) {
-        if (nested.isFile && nested.name.endsWith(".css")) {
+  for (const entry of await readdir(stylesDir, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      for (const nested of await readdir(join(stylesDir, entry.name), { withFileTypes: true })) {
+        if (nested.isFile() && nested.name.endsWith(".css")) {
           found.push(join(entry.name, nested.name))
         }
       }
-    } else if (entry.isFile && entry.name.endsWith(".css")) {
+    } else if (entry.isFile() && entry.name.endsWith(".css")) {
       found.push(entry.name)
     }
   }
@@ -33,7 +34,7 @@ async function buildCss({ minify = false }) {
   let css = ""
   for (const file of files) {
     const path = join(stylesDir, file)
-    const content = await Deno.readTextFile(path)
+    const content = await readFile(path, "utf8")
     css += `${content}\n`
   }
 
@@ -43,10 +44,12 @@ async function buildCss({ minify = false }) {
       .replace(/\s*;\s*/g, ";").replace(/;\s*}/g, "}").trim()
   }
 
-  await Deno.mkdir(publicDir, { recursive: true })
+  await mkdir(publicDir, { recursive: true })
   const outPath = join(publicDir, "styles.min.css")
-  await Deno.writeTextFile(outPath, css.trim())
-  console.log(`CSS built${minify ? " (minified)" : ""} from ${files.length} files to ${relative(Deno.cwd(), outPath)}`)
+  await writeFile(outPath, css.trim())
+  console.log(
+    `CSS built${minify ? " (minified)" : ""} from ${files.length} files to ${relative(process.cwd(), outPath)}`,
+  )
 }
 
-await buildCss({ minify: Deno.args.includes("--minify") })
+await buildCss({ minify: process.argv.includes("--minify") })

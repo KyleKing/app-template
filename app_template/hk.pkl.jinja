@@ -1,35 +1,40 @@
 amends "package://github.com/jdx/hk/releases/download/v{{ hk_version }}/hk@{{ hk_version }}#/Config.pkl"
 
+local checks = new Mapping<String, Step> {
+    ["bench"] {
+        glob = "*_bench.ts"
+        check = "pnpm bench"
+    }
+    ["biome"] {
+        glob = "*.ts"
+        check = "pnpm biome check {% raw %}{{files}}{% endraw %}"
+        fix = "pnpm biome check --write {% raw %}{{files}}{% endraw %}"
+    }
+    ["check"] {
+        glob = "*.ts"
+        check = "pnpm check"
+    }
+    ["fmt"] {
+        check = "pnpm exec dprint check {% raw %}{{files}}{% endraw %}"
+        fix = "pnpm exec dprint fmt {% raw %}{{files}}{% endraw %}"
+    }
+    ["test"] {
+        glob = "*_test.ts"
+        check = "pnpm test"
+    }
+    ["test:e2e"] {
+        glob = "*.ts"
+        check = "pnpm test:e2e --project=chrome"
+        // profiles = "slow")
+    }
+}
+
 hooks {
+    ["check"] {
+        steps = checks
+    }
     ["pre-commit"] {
         fix = true
-        steps {
-            ["bench"] {
-                glob = "*_bench.ts"
-                check = "deno task bench"
-            }
-            ["biome"] {
-                glob = "*.ts"
-                check = "deno task biome check {% raw %}{{files}}{% endraw %}"
-                fix = "deno task biome check --write {% raw %}{{files}}{% endraw %}"
-            }
-            ["check"] {
-                glob = "*.ts"
-                check = "deno check"
-            }
-            ["fmt"] {
-                check = "deno task fmt --check {% raw %}{{files}}{% endraw %}"
-                fix = "deno task fmt {% raw %}{{files}}{% endraw %}"
-            }
-            ["test"] {
-                glob = "*_test.ts"
-                check = "deno task test"
-            }
-            ["test:e2e"] {
-                glob = "*.ts"
-                check = "deno task test:e2e --project=chrome"
-                // profiles = "slow")
-            }
-        }
+        steps = checks
     }
 }

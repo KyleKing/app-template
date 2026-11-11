@@ -1,11 +1,11 @@
-import { api } from "@/api.ts"
-import { extendLogContext, getLogContext, initializeContext } from "@/logContext.ts"
-import { registerRoutes } from "@/routes.ts"
-import { getEnvConfig } from "@/utils/env.ts"
-import { handleApiError } from "@/utils/errorHandler.ts"
+import { api } from "#src/api.ts"
+import { extendLogContext, getLogContext, initializeContext } from "#src/logContext.ts"
+import { registerRoutes } from "#src/routes.ts"
+import { getEnvConfig } from "#src/utils/env.ts"
+import { handleApiError } from "#src/utils/errorHandler.ts"
 import { configure, getConsoleSink, getLogger } from "@logtape/logtape"
 import { Hono } from "hono"
-import { serveStatic } from "hono/deno"
+import { serveStatic } from "@hono/node-server/serve-static"
 
 await configure({
   sinks: {
@@ -82,8 +82,6 @@ app.route("/iapi", api)
 app.get(
   "/public/*",
   serveStatic({
-    // PLANNED: Revisit support of compression: https://docs.deno.com/deploy/api/compression
-    // precompressed: true,
     root: "./",
   }),
 )

@@ -11,11 +11,11 @@ export default defineConfig({
 
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!Deno.env.get("CI"),
+  forbidOnly: !!process.env.CI,
   /* Retry on CI only */
-  retries: Deno.env.get("CI") ? 2 : 0,
+  retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: Deno.env.get("CI") ? 1 : undefined,
+  workers: process.env.CI ? 1 : undefined,
 
   timeout: 5_000,
   expect: { timeout: 1_000 },
@@ -35,7 +35,7 @@ export default defineConfig({
     /* Capture screenshots on failure */
     screenshot: "only-on-failure",
     /* Capture video on failure in CI */
-    video: Deno.env.get("CI") ? "retain-on-failure" : "off",
+    video: process.env.CI ? "retain-on-failure" : "off",
   },
 
   projects: [
@@ -55,7 +55,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: `PORT=${PORT} deno task dev`,
+    command: `PORT=${PORT} pnpm dev`,
     url: BASE_URL,
     timeout: 10 * 1000,
   },

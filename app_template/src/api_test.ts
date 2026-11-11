@@ -1,5 +1,6 @@
-import { app } from "@/app.ts"
-import { assertEquals } from "@std/assert"
+import assert from "node:assert/strict"
+import { test } from "node:test"
+import { app } from "#src/app.ts"
 
 interface TestParams {
   name: string
@@ -18,7 +19,7 @@ interface RequestOptions {
 }
 
 function runAppTest(params: TestParams) {
-  Deno.test(params.name, async () => {
+  test(params.name, async () => {
     const requestOptions: RequestOptions = { method: params.method }
     if (params.headers) {
       requestOptions.headers = params.headers
@@ -29,11 +30,11 @@ function runAppTest(params: TestParams) {
 
     const response = await app.request(params.url, requestOptions)
 
-    assertEquals(response.status, params.expectedStatus)
+    assert.equal(response.status, params.expectedStatus)
     if (params.expectedContent) {
       const responseText = await response.text()
       const hr = `\n'''\n`
-      assertEquals(
+      assert.equal(
         responseText,
         params.expectedContent,
         `Error: expectedContent does not match:${hr}${responseText}${hr}${hr}${params.expectedContent}${hr}`,

@@ -3,7 +3,7 @@ import { z } from "zod"
 const PROD_ENV = "production"
 
 function isProduction() {
-  return (Deno.env.get("NODE_ENV") || "") === PROD_ENV
+  return (process.env.NODE_ENV || "") === PROD_ENV
 }
 
 export const envSchema = z.object({
@@ -35,9 +35,9 @@ export type EnvConfig = z.infer<typeof envSchema>
 
 export function getEnvConfig(): EnvConfig {
   return envSchema.parse({
-    NODE_ENV: Deno.env.get("NODE_ENV"),
-    PORT: Deno.env.get("PORT"),
-    HOST: Deno.env.get("HOST"),
-    LOG_LEVEL: Deno.env.get("LOG_LEVEL"),
+    NODE_ENV: process.env.NODE_ENV,
+    PORT: process.env.PORT,
+    HOST: process.env.HOST,
+    LOG_LEVEL: process.env.LOG_LEVEL,
   })
 }

@@ -25,17 +25,17 @@ jobs:
 
       - name: Install dependencies and build assets
         run: |
-          deno install
+          pnpm install --frozen-lockfile
           mise run build
 
       - name: Run Tests
-        run: deno task test
+        run: pnpm test
 
       - name: Type Check
-        run: deno task check
+        run: pnpm check
 
       - name: Check Format
-        run: deno task fmt --check
+        run: pnpm fmt:check
 
       - name: Check Biome
-        run: deno task biome check
+        run: pnpm biome check

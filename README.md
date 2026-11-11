@@ -1,6 +1,6 @@
 # app-template
 
-A [copier](https://copier.readthedocs.io) template for Deno web applications built with Hono (routing), Vento (server-rendered templates), and htmx (interactivity). It shares TypeScript between the server and the browser and manages CSS without a framework or React.
+A [copier](https://copier.readthedocs.io) template for Node 26 web applications built with Hono (routing), Vento (server-rendered templates), and htmx (interactivity). It shares TypeScript between the server and the browser and manages CSS without a framework or React.
 
 ```sh
 copier copy --trust gh:kyleking/app-template your-project-name
@@ -15,10 +15,12 @@ copier copy --trust gh:kyleking/app-template your-project-name
 | `src/api.ts` | JSON endpoints under `/iapi`, starting with `/healthz` |
 | `src/templates/` | Vento engine, `renderPage` helper, and a base layout |
 | `src/utils/` | Zod-validated env config, error handler, and HTML whitespace trimming |
+| `scripts/compile.ts` | Bundles the server with esbuild and builds a single executable with `node --build-sea` |
 | `shared/` | Isomorphic modules transpiled to `public/shared/` for the browser |
 | `styles/` | Design tokens and base styles, concatenated by `scripts/build-css.ts` |
 | `tests/e2e/` | Playwright fixtures that fail a test on any console error or on CSS coverage below 90% |
 | `hk.pkl`, `biome.json`, `dprint.json` | Pre-commit hooks, linting, and formatting |
+| `package.json`, `tsconfig.json` | pnpm scripts, `#src/*` and `#shared/*` import aliases, and `tsc` settings |
 | `.github/workflows/ci.yml` | Tests, type check, format check, lint, and headless Chrome e2e |
 
 ## Questions
@@ -26,7 +28,7 @@ copier copy --trust gh:kyleking/app-template your-project-name
 | Variable | Default | Description |
 | --- | --- | --- |
 | `development_branch` | `main` | Branch CI runs against |
-| `project_name` | — | Lowercase, hyphens allowed. Names the binary, the deno module, and the nav brand |
+| `project_name` | — | Lowercase, hyphens allowed. Names the binary, the package, and the nav brand |
 | `project_description` | — | Shown on the generated home page and README |
 | `author_name` | `Kyle King` | |
 | `author_email` | `dev.act.kyle@gmail.com` | |
@@ -62,7 +64,13 @@ git diff .ctt         # review what changed for a generated project
 `.ctt/default` is the bare scaffolding a new project starts from. [`.ctt/demo`](./.ctt/demo/README.md) is the same scaffolding with a runnable htmx comments demo committed on top; ctt renders over it without deleting files the template does not emit, so the demo survives regeneration. Run it with:
 
 ```sh
-cd .ctt/demo && mise run build && deno task dev
+cd .ctt/demo && mise run build && pnpm dev
+```
+
+hk runs from the git root, and a `.ctt/` case has no repository of its own. To run a case's checks, give it a throwaway one:
+
+```sh
+cd .ctt/default && mise run build && git init -q && mise exec -- hk check --all; rm -rf .git
 ```
 
 Both directories are checked by the same [CI workflow](./.github/workflows/ci.yml) that a generated project gets.

@@ -22,4 +22,4 @@ project_name = "test-template"
 [output.".ctt/demo"]
 _keep_output = true
 project_name = "app-template-demo"
-project_description = "Deno + Hono + Vento + htmx demo for app-template"
+project_description = "Node + Hono + Vento + htmx demo for app-template"
