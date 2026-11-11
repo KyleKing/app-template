@@ -1,6 +1,6 @@
 # Changes here will be overwritten by Copier
-_commit: HEAD
-_src_path: ../../app-template
+_commit: v0.4.1
+_src_path: /Users/kyleking/Developer/kyleking/app-template
 author_email: ctt@ctt.ctt
 author_name: Carl The Template
 author_username: user_ctt
