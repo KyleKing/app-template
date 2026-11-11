@@ -1,7 +1,8 @@
 // Usage: node scripts/migrate-to-node.ts [project-dir]. Exits 1 while call sites remain that need a manual fix.
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs"
-import { dirname, join, resolve } from "node:path"
+import { dirname, join, relative, resolve } from "node:path"
 
+const SCANNED_FILE = /\.(?:md|ts|vto)$/
 const SKIPPED_DIRS = new Set([".git", "coverage", "dist", "node_modules", "public"])
 
 const SPECIFIERS: Record<string, string> = {
@@ -29,7 +30,7 @@ function* walk(dir: string): Generator<string> {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (entry.isDirectory()) {
       if (!SKIPPED_DIRS.has(entry.name)) yield* walk(join(dir, entry.name))
-    } else if (entry.name.endsWith(".ts")) {
+    } else if (SCANNED_FILE.test(entry.name)) {
       yield join(dir, entry.name)
     }
   }
@@ -58,7 +59,7 @@ function closingParen(source: string, open: number): number {
   let depth = 0
   for (let i = open; i < source.length; i++) {
     const ch = source[i]
-    if (ch === "\"" || ch === "'" || ch === "`") {
+    if (ch === '"' || ch === "'" || ch === "`") {
       for (i++; i < source.length && source[i] !== ch; i++) if (source[i] === "\\") i++
     } else if (ch === "(" || ch === "[" || ch === "{") depth++
     else if (ch === ")" || ch === "]" || ch === "}") {
@@ -74,7 +75,7 @@ function splitArguments(args: string): string[] {
   let start = 0
   for (let i = 0; i < args.length; i++) {
     const ch = args[i]
-    if (ch === "\"" || ch === "'" || ch === "`") {
+    if (ch === '"' || ch === "'" || ch === "`") {
       for (i++; i < args.length && args[i] !== ch; i++) if (args[i] === "\\") i++
     } else if (ch === "(" || ch === "[" || ch === "{") depth++
     else if (ch === ")" || ch === "]" || ch === "}") depth--
@@ -115,7 +116,7 @@ function rewriteAssertions(source: string): string {
     if (supported.length) imported = true
     const unsupported = wanted.filter((n) => !supported.includes(n))
     if (unsupported.length) leftover = `import { ${unsupported.join(", ")} } from "@std/assert"\n`
-    return `${supported.length ? "import assert from \"node:assert/strict\"\n" : ""}${leftover}`
+    return `${supported.length ? 'import assert from "node:assert/strict"\n' : ""}${leftover}`
   })
   if (!imported) return next
   next = rewriteStringIncludes(next)
@@ -140,12 +141,13 @@ function migrate(source: string, file: string): string {
   return rewriteTests(rewriteAssertions(rewritten))
 }
 
-const LEFTOVER_PATTERNS = [/\bDeno\./, /["'](?:@std\/|jsr:|npm:|https?:\/\/)[^"']*["']/]
+const REMOTE_SPECIFIER = /^(?:@std\/|jsr:|npm:|https?:\/\/)/
 
 function leftovers(source: string, file: string): string[] {
-  return source.split("\n").flatMap((line, index) =>
-    LEFTOVER_PATTERNS.some((pattern) => pattern.test(line)) ? [`${file}:${index + 1}: ${line.trim()}`] : []
-  )
+  return source.split("\n").flatMap((line, index) => {
+    const remote = [...line.matchAll(SPECIFIER_PATTERN)].some((match) => REMOTE_SPECIFIER.test(match[3]))
+    return remote || /\bdeno\b/i.test(line) ? [`${relative(root, file)}:${index + 1}: ${line.trim()}`] : []
+  })
 }
 
 const root = resolve(process.argv[2] ?? ".")
@@ -154,7 +156,7 @@ const remaining: string[] = []
 
 for (const file of walk(root)) {
   const original = readFileSync(file, "utf8")
-  const migrated = migrate(original, file)
+  const migrated = file.endsWith(".ts") ? migrate(original, file) : original
   if (migrated !== original) {
     writeFileSync(file, migrated)
     changed.push(file)
@@ -163,7 +165,7 @@ for (const file of walk(root)) {
 }
 
 console.log(`Rewrote ${changed.length} files`)
-for (const file of changed) console.log(`  ${file}`)
+for (const file of changed) console.log(`  ${relative(root, file)}`)
 if (remaining.length) {
   console.log(`\n${remaining.length} call sites need a manual fix:`)
   for (const line of remaining) console.log(`  ${line}`)
