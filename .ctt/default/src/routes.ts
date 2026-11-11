@@ -1,5 +1,5 @@
-import { renderPage } from "@/templates/helpers.ts"
-import { handleApiError } from "@/utils/errorHandler.ts"
+import { renderPage } from "#src/templates/helpers.ts"
+import { handleApiError } from "#src/utils/errorHandler.ts"
 import type { Hono } from "hono"
 
 /**

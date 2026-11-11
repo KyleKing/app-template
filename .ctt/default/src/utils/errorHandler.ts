@@ -1,6 +1,6 @@
 import type { Context } from "hono"
 import type { ContentfulStatusCode } from "hono/utils/http-status"
-import { extendLogContext } from "@/logContext.ts"
+import { extendLogContext } from "#src/logContext.ts"
 
 export interface ErrorContext {
   [key: string]: unknown

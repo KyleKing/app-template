@@ -1,0 +1,46 @@
+{
+  "name": "test-template",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26"
+  },
+  "imports": {
+    "#shared/*": "./shared/*",
+    "#src/*": "./src/*"
+  },
+  "scripts": {
+    "bench": "LOG_LEVEL=error node scripts/bench.ts",
+    "biome": "biome",
+    "build": "pnpm build:css && pnpm build:shared && ./scripts/download-assets.sh",
+    "build:css": "node scripts/build-css.ts",
+    "build:shared": "node scripts/build-shared.ts",
+    "check": "tsc --noEmit",
+    "dev": "node --permission --allow-fs-read=. --allow-net scripts/app-server.ts",
+    "fmt": "dprint fmt",
+    "fmt:check": "dprint check",
+    "prod": "pnpm build:css --minify && pnpm build:shared && NODE_ENV=production node --permission --allow-fs-read=. --allow-net scripts/app-server.ts",
+    "test": "node --test \"src/**/*_test.ts\" \"shared/**/*_test.ts\"",
+    "test:cov": "node --test --experimental-test-coverage \"src/**/*_test.ts\" \"shared/**/*_test.ts\"",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "pnpm install && playwright install firefox webkit chromium --only-shell",
+    "test:e2e:ui": "playwright test --debug --project=chrome",
+    "test:watch": "node --test --watch \"src/**/*_test.ts\" \"shared/**/*_test.ts\""
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.0",
+    "@logtape/logtape": "^2.4.2",
+    "hono": "^4.13.0",
+    "ventojs": "^2.4.2",
+    "zod": "^4.6.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.6",
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^26.6.6",
+    "dprint": "^0.64.3",
+    "tinybench": "^6.2.3",
+    "typescript": "^6.0.3"
+  }
+}

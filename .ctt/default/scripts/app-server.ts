@@ -1,14 +1,11 @@
-import { app } from "@/app.ts"
-import { getEnvConfig } from "@/utils/env.ts"
+import { serve } from "@hono/node-server"
+import { app } from "#src/app.ts"
+import { getEnvConfig } from "#src/utils/env.ts"
 
 const config = getEnvConfig()
 
-Deno.serve({
-  port: config.PORT,
-  hostname: config.HOST,
-  onListen: ({ hostname, port }) => {
-    console.log(`Server listening at http://${hostname}:${port}`)
-    console.log(`Environment: ${config.NODE_ENV}`)
-    console.log(`Log level: ${config.LOG_LEVEL}`)
-  },
-}, app.fetch)
+serve({ fetch: app.fetch, port: config.PORT, hostname: config.HOST }, ({ address, port }) => {
+  console.log(`Server listening at http://${address}:${port}`)
+  console.log(`Environment: ${config.NODE_ENV}`)
+  console.log(`Log level: ${config.LOG_LEVEL}`)
+})

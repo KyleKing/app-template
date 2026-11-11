@@ -1,7 +1,8 @@
 [tools]
-deno = "latest"
 hk = "1.53.0"
+node = "26"
 pkl = "latest"
+pnpm = "11"
 
 [tasks.build]
 description = 'Build generated code'
@@ -9,12 +10,12 @@ depends = ['build-css', 'build-shared', 'download-assets']
 
 [tasks.build-css]
 description = "Build CSS from styles directory. Optionally compress with `--minify`"
-run = "deno run --allow-read --allow-write ./scripts/build-css.ts"
+run = "pnpm build:css"
 sources = ["styles/**/*.css"]
 
 [tasks.build-shared]
 description = "Transpile shared server code to JS for client"
-run = "deno run --allow-read --allow-write --allow-env --allow-net ./scripts/build-shared.ts"
+run = "pnpm build:shared"
 sources = ["shared/*.ts"]
 
 [tasks.download-assets]
@@ -24,5 +25,5 @@ run = "./scripts/download-assets.sh"
 [tasks.dev]
 description = "Watch for changes and refresh the local server"
 # depends = ['build'] # PLANNED: Support `[dev] {..}` with tail-jsonl
-run = "deno task dev"
+run = "pnpm dev"
 sources = ["src/templates/**/*.vto"]
