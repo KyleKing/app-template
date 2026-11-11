@@ -1,3 +1,15 @@
+## v1.0.0 (2026-11-11)
+
+### Feat
+
+- **codemod**: rewrite bdd imports, throws, and deno tasks, and flag non-erasable syntax
+- add a codemod that moves a Deno project to Node 26 conventions
+- replace Deno with Node 26 and pnpm in the template
+
+### Fix
+
+- prefer double quotes and leave Vento templates out of dprint
+
 ## v0.4.1 (2026-09-01)
 
 ### Fix
