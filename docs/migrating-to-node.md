@@ -14,10 +14,10 @@ Start from a clean tree on a branch.
     rm -rf node_modules
     ```
 
-1. Update from the template. The rehearsal used the local checkout (`--vcs-ref=HEAD`), so substitute the release tag once it exists. `--skip-tasks` skips the template's `git init`
+1. Update from the template. `--skip-tasks` skips the template's `git init`. If your `.copier-answers.yml` points `_src_path` at a local path, set it to `gh:KyleKing/app-template` first
 
     ```sh
-    copier update --UNSAFE --conflict=rej --defaults --skip-tasks --vcs-ref=<release tag>
+    copier update --UNSAFE --conflict=rej --defaults --skip-tasks --vcs-ref=v1.0.0
     ```
 
     The demo produced no `.rej` files. Copier deleted `deno.json` and `deno.lock` because the project had not edited them, and wrote `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `scripts/bench.ts`, and `scripts/compile.ts`. The demo never edited `deno.json`. A project that did (checked on a second rehearsal) gets `deno.json.rej` and `deno.lock.rej`, and `deno.json` is deleted. Read your old dependencies and tasks with `git show HEAD:deno.json` and move them to `package.json` by hand (`pnpm add` for packages, `scripts` for tasks)
@@ -28,10 +28,11 @@ Start from a clean tree on a branch.
     mise install
     ```
 
-1. Run the codemod from a checkout of the template. It rewrites `.ts` files in place and lists everything it could not rewrite. It exits 1 while that list is not empty
+1. Run the codemod. It rewrites `.ts` files in place and lists everything it could not rewrite. It exits 1 while that list is not empty. Node prints a `MODULE_TYPELESS_PACKAGE_JSON` warning for the downloaded file, which is harmless
 
     ```sh
-    node <app-template checkout>/scripts/migrate-to-node.ts .
+    curl -fsSL https://raw.githubusercontent.com/KyleKing/app-template/v1.0.0/scripts/migrate-to-node.ts -o /tmp/migrate-to-node.ts
+    node /tmp/migrate-to-node.ts .
     ```
 
     - `@/` becomes `#src/` and `~/` becomes `#shared/`
@@ -163,7 +164,6 @@ Each was run against the Node 26.13.1 spike and the demo.
 
 ## Not checked
 
-- `copier update` against a published `v1.0.0` tag. The rehearsal used the local checkout
 - Real projects. No `.copier-answers.yml` names this template under `~/Developer` or in public GitHub code search, so the manual-fix lists above come from the demo and one generated stand-in
 
-A fresh `copier copy` of the update branch into an empty directory passed the same ladder using only the commands in `_message_after_copy`.
+The generated stand-in was also updated from the published `v1.0.0` tag with the `curl`ed codemod and reached the same result. A fresh `copier copy` of the update branch into an empty directory passed the same ladder using only the commands in `_message_after_copy`.
