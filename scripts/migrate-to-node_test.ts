@@ -21,6 +21,7 @@ test("rewrites imports, tests, and assertions, then reports what is left", () =>
     "src/util.ts": "export const x = 1\n",
     "src/util_test.ts": [
       'import { assertEquals, assertStringIncludes, assertThrows } from "@std/assert"',
+      'import { describe, it } from "@std/testing/bdd"',
       'import { join } from "@std/path"',
       'import { x } from "./util"',
       'import { y } from "~/shared.ts"',
@@ -30,24 +31,29 @@ test("rewrites imports, tests, and assertions, then reports what is left", () =>
       "  assertEquals(x, 1)",
       '  assertStringIncludes(join("a", "b"), "a", "msg, with comma")',
       "  assertThrows(() => Deno.cwd())",
+      '  assertThrows(() => Deno.cwd(), Error, "msg")',
       "})",
       "",
     ].join("\n"),
-    "README.md": "Run `deno task dev`\n",
+    "src/ticket.ts":
+      "export enum Status {\n  Open,\n}\nexport class Ticket {\n  constructor(public id: number) {}\n}\n",
+    "README.md": "Run `deno task dev` after `deno install`, or `deno run x.ts`\n",
   })
   try {
     const result = spawnSync(process.execPath, [script, dir], { encoding: "utf8" })
     assert.equal(result.status, 1)
     assert.match(result.stdout, /src\/util_test\.ts:\d+: import \{ assertThrows \} from "@std\/assert"/)
-    assert.match(result.stdout, /src\/util_test\.ts:\d+: assertThrows\(\(\) => Deno\.cwd\(\)\)/)
-    assert.match(result.stdout, /README\.md:1: Run `deno task dev`/)
+    assert.match(result.stdout, /src\/util_test\.ts:\d+: assertThrows\(\(\) => Deno\.cwd\(\), Error, "msg"\)/)
+    assert.match(result.stdout, /README\.md:1: Run `pnpm dev` after `pnpm install`, or `deno run x\.ts`/)
+    assert.match(result.stdout, /src\/ticket\.ts:1: export enum Status \{/)
+    assert.match(result.stdout, /src\/ticket\.ts:5: constructor\(public id: number\) \{\}/)
 
     assert.equal(
       readFileSync(join(dir, "src/util_test.ts"), "utf8"),
       [
-        'import { test } from "node:test"',
         'import assert from "node:assert/strict"',
         'import { assertThrows } from "@std/assert"',
+        'import { describe, it, test } from "node:test"',
         'import { join } from "node:path"',
         'import { x } from "./util.ts"',
         'import { y } from "#shared/shared.ts"',
@@ -56,7 +62,8 @@ test("rewrites imports, tests, and assertions, then reports what is left", () =>
         'test("x", () => {',
         "  assert.deepEqual(x, 1)",
         '  assert.ok((join("a", "b")).includes("a"), "msg, with comma")',
-        "  assertThrows(() => Deno.cwd())",
+        "  assert.throws(() => Deno.cwd())",
+        '  assertThrows(() => Deno.cwd(), Error, "msg")',
         "})",
         "",
       ].join("\n"),

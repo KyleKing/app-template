@@ -22,9 +22,14 @@ const ASSERT_RENAMES: Record<string, string> = {
   assertStrictEquals: "assert.equal",
 }
 const ASSERT_STRING_INCLUDES = "assertStringIncludes"
+const ASSERT_THROWS = { assertRejects: "assert.rejects", assertThrows: "assert.throws" }
+const BDD_NAMES = new Set(["afterEach", "beforeEach", "describe", "it"])
 
 const SPECIFIER_PATTERN = /(\bfrom\s*|\bimport\s*\(?\s*)(["'])([^"'\n]+)\2/g
 const ASSERT_IMPORT_PATTERN = /import\s*\{([^}]*)\}\s*from\s*["']@std\/assert["']\n?/g
+const BDD_IMPORT_PATTERN = /(import\s*\{([^}]*)\}\s*from\s*)["']@std\/testing\/bdd["']/g
+const NODE_TEST_IMPORT_PATTERN = /import\s*\{([^}]*)\}\s*from\s*"node:test"/
+const DENO_COMMANDS = [[/\bdeno task ([\w:-]+)/g, "pnpm $1"], [/\bdeno install\b/g, "pnpm install"]] as const
 
 function* walk(dir: string): Generator<string> {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -107,46 +112,105 @@ function rewriteStringIncludes(source: string): string {
   return result + source.slice(cursor)
 }
 
+function rewriteThrows(source: string, name: keyof typeof ASSERT_THROWS): { source: string; kept: boolean } {
+  const pattern = new RegExp(`(?<![\\w.$])${name}\\(`, "g")
+  let result = ""
+  let cursor = 0
+  let kept = false
+  for (let match = pattern.exec(source); match; match = pattern.exec(source)) {
+    const open = match.index + match[0].length - 1
+    const close = closingParen(source, open)
+    if (close === -1) break
+    if (splitArguments(source.slice(open + 1, close)).length > 2) {
+      kept = true
+      continue
+    }
+    result += `${source.slice(cursor, match.index)}${ASSERT_THROWS[name]}(`
+    cursor = open + 1
+  }
+  return { source: result + source.slice(cursor), kept }
+}
+
 function rewriteAssertions(source: string): string {
-  let imported = false
-  let leftover = ""
-  let next = source.replace(ASSERT_IMPORT_PATTERN, (_, names: string) => {
-    const wanted = names.split(",").map((n) => n.trim()).filter(Boolean)
-    const supported = wanted.filter((n) => n in ASSERT_RENAMES || n === ASSERT_STRING_INCLUDES)
-    if (supported.length) imported = true
-    const unsupported = wanted.filter((n) => !supported.includes(n))
-    if (unsupported.length) leftover = `import { ${unsupported.join(", ")} } from "@std/assert"\n`
-    return `${supported.length ? 'import assert from "node:assert/strict"\n' : ""}${leftover}`
-  })
-  if (!imported) return next
-  next = rewriteStringIncludes(next)
+  if (source.search(ASSERT_IMPORT_PATTERN) === -1) return source
+  let next = rewriteStringIncludes(source)
+  const keptNames: string[] = []
+  for (const name of Object.keys(ASSERT_THROWS) as Array<keyof typeof ASSERT_THROWS>) {
+    const result = rewriteThrows(next, name)
+    next = result.source
+    if (result.kept) keptNames.push(name)
+  }
   for (const [name, replacement] of Object.entries(ASSERT_RENAMES)) {
     next = next.replace(new RegExp(`(?<![\\w.$])${name}\\(`, "g"), `${replacement}(`)
   }
-  return next
+  return next.replace(ASSERT_IMPORT_PATTERN, (_, names: string) => {
+    const wanted = names.split(",").map((n) => n.trim()).filter(Boolean)
+    const known = [...Object.keys(ASSERT_RENAMES), ASSERT_STRING_INCLUDES, ...Object.keys(ASSERT_THROWS)]
+    const leftover = wanted.filter((n) => !known.includes(n) || keptNames.includes(n))
+    const converted = wanted.length > leftover.length
+    return `${converted ? 'import assert from "node:assert/strict"\n' : ""}${
+      leftover.length ? `import { ${leftover.join(", ")} } from "@std/assert"\n` : ""
+    }`
+  })
 }
 
 function rewriteTests(source: string): string {
   const next = source.replace(/(?<![\w.$])Deno\.test\(\s*(?=["'`])/g, (call) => call.replace("Deno.test", "test"))
-  if (next === source || /import[^;\n]*\btest\b[^;\n]*from/.test(next)) return next
+  if (next === source) return next
+  const existing = NODE_TEST_IMPORT_PATTERN.exec(next)
+  if (existing) {
+    const names = existing[1].split(",").map((n) => n.trim()).filter(Boolean)
+    if (names.includes("test")) return next
+    return next.replace(NODE_TEST_IMPORT_PATTERN, `import { ${[...names, "test"].sort().join(", ")} } from "node:test"`)
+  }
+  if (/import[^;\n]*\btest\b[^;\n]*from/.test(next)) return next
   return `import { test } from "node:test"\n${next}`
 }
 
+function migrateText(source: string): string {
+  return DENO_COMMANDS.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), source)
+}
+
 function migrate(source: string, file: string): string {
-  const rewritten = source.replace(
-    SPECIFIER_PATTERN,
-    (_, lead: string, quote: string, specifier: string) =>
-      `${lead}${quote}${rewriteSpecifier(specifier, file)}${quote}`,
-  )
+  const rewritten = source
+    .replace(BDD_IMPORT_PATTERN, (statement, lead: string, names: string) => {
+      const wanted = names.split(",").map((n) => n.trim()).filter(Boolean)
+      return wanted.every((n) => BDD_NAMES.has(n)) ? `${lead}"node:test"` : statement
+    })
+    .replace(
+      SPECIFIER_PATTERN,
+      (_, lead: string, quote: string, specifier: string) =>
+        `${lead}${quote}${rewriteSpecifier(specifier, file)}${quote}`,
+    )
   return rewriteTests(rewriteAssertions(rewritten))
 }
 
 const REMOTE_SPECIFIER = /^(?:@std\/|jsr:|npm:|https?:\/\/)/
 
+const NON_ERASABLE = [
+  /^\s*(?:export\s+)?(?:declare\s+)?(?:const\s+)?enum\s/,
+  /^\s*(?:export\s+)?(?:declare\s+)?namespace\s/,
+]
+const PARAMETER_PROPERTY = /\bconstructor\s*\(([^)]*)\)/g
+const PARAMETER_MODIFIER = /\b(?:public|private|protected|readonly)\s+[\w$]+/
+
+function nonErasableLines(source: string): Set<number> {
+  const lines = new Set<number>()
+  source.split("\n").forEach((line, index) => {
+    if (NON_ERASABLE.some((pattern) => pattern.test(line))) lines.add(index + 1)
+  })
+  for (const match of source.matchAll(PARAMETER_PROPERTY)) {
+    if (PARAMETER_MODIFIER.test(match[1])) lines.add(source.slice(0, match.index).split("\n").length)
+  }
+  return lines
+}
+
 function leftovers(source: string, file: string): string[] {
+  const unerasable = file.endsWith(".ts") ? nonErasableLines(source) : new Set<number>()
   return source.split("\n").flatMap((line, index) => {
     const remote = [...line.matchAll(SPECIFIER_PATTERN)].some((match) => REMOTE_SPECIFIER.test(match[3]))
-    return remote || /\bdeno\b/i.test(line) ? [`${relative(root, file)}:${index + 1}: ${line.trim()}`] : []
+    const flagged = remote || /\bdeno\b/i.test(line) || unerasable.has(index + 1)
+    return flagged ? [`${relative(root, file)}:${index + 1}: ${line.trim()}`] : []
   })
 }
 
@@ -156,7 +220,7 @@ const remaining: string[] = []
 
 for (const file of walk(root)) {
   const original = readFileSync(file, "utf8")
-  const migrated = file.endsWith(".ts") ? migrate(original, file) : original
+  const migrated = migrateText(file.endsWith(".ts") ? migrate(original, file) : original)
   if (migrated !== original) {
     writeFileSync(file, migrated)
     changed.push(file)

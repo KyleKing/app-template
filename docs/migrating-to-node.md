@@ -20,7 +20,7 @@ Start from a clean tree on a branch.
     copier update --UNSAFE --conflict=rej --defaults --skip-tasks --vcs-ref=<release tag>
     ```
 
-    The demo produced no `.rej` files. Copier deleted `deno.json` and `deno.lock` because the project had not edited them, and wrote `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `scripts/bench.ts`, and `scripts/compile.ts`. The demo never edited `deno.json`. A project that did has dependencies and tasks that must move to `package.json` by hand, and copier will probably leave a `.rej` for the deleted file
+    The demo produced no `.rej` files. Copier deleted `deno.json` and `deno.lock` because the project had not edited them, and wrote `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json`, `scripts/bench.ts`, and `scripts/compile.ts`. The demo never edited `deno.json`. A project that did (checked on a second rehearsal) gets `deno.json.rej` and `deno.lock.rej`, and `deno.json` is deleted. Read your old dependencies and tasks with `git show HEAD:deno.json` and move them to `package.json` by hand (`pnpm add` for packages, `scripts` for tasks)
 
 1. Install the pinned tools (`node` 26 and `pnpm` 12)
 
@@ -36,9 +36,11 @@ Start from a clean tree on a branch.
 
     - `@/` becomes `#src/` and `~/` becomes `#shared/`
     - `@std/assert` becomes `node:assert/strict` (see the table below), `@std/path` becomes `node:path`, `vento/mod.ts` becomes `ventojs`, and `hono/deno` becomes `@hono/node-server/serve-static`
-    - `Deno.test("name", fn)` becomes `test("name", fn)` with an `import { test } from "node:test"`
+    - `Deno.test("name", fn)` becomes `test("name", fn)`, added to an existing `node:test` import or a new one
+    - `describe`, `it`, `beforeEach`, and `afterEach` from `@std/testing/bdd` come from `node:test`
+    - `deno task <name>` and `deno install` become `pnpm <name>` and `pnpm install` in `.ts`, `.vto`, and `.md` files
     - Relative imports gain their `.ts` extension
-    - It prints every remaining `Deno.` use, remote specifier (`@std/`, `jsr:`, `npm:`, `http(s)://`), and mention of `deno` in `.ts`, `.vto`, and `.md` files
+    - It prints every remaining `Deno.` use, remote specifier (`@std/`, `jsr:`, `npm:`, `http(s)://`), mention of `deno`, and non-erasable TypeScript (`enum`, `namespace`, and constructor parameter properties) in `.ts`, `.vto`, and `.md` files
 
 1. Fix what the codemod printed (next section), then install, build, and check
 
@@ -65,7 +67,7 @@ The codemod rewrote 5 files and listed 1 call site and 3 text mentions.
     | `spy.restore()` | `spy.mock.restore()` |
 
 - `README.md` and a comment in `tests/e2e/comments.spec.ts` still named `deno install`, `deno task dev`, and `deno task test:e2e`. The template never overwrites a README, so these are yours to edit (`pnpm install`, `pnpm dev`, `pnpm test:e2e`)
-- The codemod has no mapping for `assertThrows`, `assertRejects`, `assertExists`, `assertFalse`, `@std/testing/bdd`, or `Deno.*` calls other than `Deno.test`. It leaves them and prints the line. The demo had none of these
+- The codemod has no mapping for `assertExists`, `assertFalse`, `Deno.test({ ... })`, `spy` and `stub`, or `Deno.*` calls other than `Deno.test`. It leaves them and prints the line
 
 The assertion rewrite follows this map. `assertEquals` becomes `deepEqual` because Deno's version compares deeply. In `node:assert/strict`, `deepEqual` is `deepStrictEqual`
 
@@ -78,6 +80,18 @@ The assertion rewrite follows this map. `assertEquals` becomes `deepEqual` becau
 | `assertMatch(s, re)` | `assert.match(s, re)` |
 | `assertNotMatch(s, re)` | `assert.doesNotMatch(s, re)` |
 | `assertStringIncludes(s, t, msg)` | `assert.ok((s).includes(t), msg)` |
+
+## What a project with Deno-specific code needed
+
+The second rehearsal generated a project from `v0.4.1`, then added what real projects have and the demo lacks: an edited `deno.json` (an extra `@std/yaml` dependency and a `seed` task), a script using `Deno.args` and `Deno.readTextFile`, a route using `Deno.env.get`, a test using `describe`, `it`, `assertThrows`, `assertRejects`, and `Deno.test({ name, fn })`, and a shared module with an `enum` and a constructor parameter property. After the update and the codemod it listed 9 call sites (14 before the codemod learned bdd, `assertThrows`, `assertRejects`, `deno task`, and non-erasable syntax). By hand it needed
+
+- `enum Status { Open = "open" }` became `const Status = { Open: "open" } as const` plus `type Status = (typeof Status)[keyof typeof Status]`. `constructor(public id: number)` became a field declaration and an assignment. `tsc` reports both under `erasableSyntaxOnly`, and `node` fails on them at runtime
+- `Deno.args`, `Deno.readTextFile`, and `Deno.env.get` became `process.argv.slice(2)`, `readFile(path, "utf8")`, and `process.env.NAME`
+- `@std/yaml` became the `yaml` package (`pnpm add yaml`)
+- `Deno.test({ name, fn })` became `test(name, fn)`
+- A README sentence that says "A Deno web application"
+
+It then passed `hk check --all`, with 21 unit tests and the chrome e2e project.
 
 ## Replacement map
 
@@ -149,6 +163,7 @@ Each was run against the Node 26.13.1 spike and the demo.
 
 ## Not checked
 
-- A fresh `copier copy` into an empty directory. Only the two `.ctt/` cases ran the ladder
 - `copier update` against a published `v1.0.0` tag. The rehearsal used the local checkout
-- Projects other than the demo. No other consumer was found under `~/Developer`, so the manual-fix list above comes from one project
+- Real projects. No `.copier-answers.yml` names this template under `~/Developer` or in public GitHub code search, so the manual-fix lists above come from the demo and one generated stand-in
+
+A fresh `copier copy` of the update branch into an empty directory passed the same ladder using only the commands in `_message_after_copy`.
