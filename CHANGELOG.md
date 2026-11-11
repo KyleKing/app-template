@@ -1,3 +1,9 @@
+## v1.1.0 (2026-11-11)
+
+### Feat
+
+- **hk**: adopt builtins, a copier conflict guard, and pre-push checks
+
 ## v1.0.0 (2026-11-11)
 
 ### Feat
