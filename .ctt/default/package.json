@@ -13,14 +13,14 @@
   "scripts": {
     "bench": "LOG_LEVEL=error node scripts/bench.ts",
     "biome": "biome",
-    "build": "pnpm build:css && pnpm build:shared && ./scripts/download-assets.sh",
     "build:css": "node scripts/build-css.ts",
     "build:shared": "node scripts/build-shared.ts",
     "check": "tsc --noEmit",
+    "compile": "node scripts/compile.ts",
     "dev": "node --permission --allow-fs-read=. --allow-net scripts/app-server.ts",
     "fmt": "dprint fmt",
     "fmt:check": "dprint check",
-    "prod": "pnpm build:css --minify && pnpm build:shared && NODE_ENV=production node --permission --allow-fs-read=. --allow-net scripts/app-server.ts",
+    "prod": "mise run build --minify && pnpm compile && NODE_ENV=production ./dist/test-template",
     "test": "node --test \"src/**/*_test.ts\" \"shared/**/*_test.ts\"",
     "test:cov": "node --test --experimental-test-coverage \"src/**/*_test.ts\" \"shared/**/*_test.ts\"",
     "test:e2e": "playwright test",
@@ -40,6 +40,7 @@
     "@playwright/test": "^1.65.0",
     "@types/node": "^26.6.6",
     "dprint": "^0.64.3",
+    "esbuild": "^0.28.2",
     "tinybench": "^6.2.3",
     "typescript": "^6.0.3"
   }
