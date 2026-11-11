@@ -6,7 +6,7 @@
   },
   "typescript": {
     "module.sortImportDeclarations": "maintain",
-    "quoteStyle": "alwaysDouble",
+    "quoteStyle": "preferDouble",
     "semiColons": "asi"
   },
   "json": {
@@ -25,6 +25,7 @@
   "excludes": [
     "**/*-lock.yaml",
     "**/*.min.js",
+    "**/*.vto",
     "**/node_modules",
     ".copier-answers.yml",
     "coverage",
