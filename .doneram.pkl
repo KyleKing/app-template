@@ -48,6 +48,12 @@ local function misePin(key: String): Site = new {
   pattern = #"\#(key) = "([\d.]+)""#
 }
 
+/// A mise tool pin in the template's generated `mise.toml`.
+local function templateMisePin(key: String): Site = new {
+  file = "app_template/mise.toml.jinja"
+  pattern = #"\#(key) = "([\d.]+)""#
+}
+
 /// A `uses: owner/repo@<sha> # <tag>` GitHub Action pin, one capture group
 /// spanning the sha and the tag together, since github-action patches both
 /// as a single resolved value.
@@ -58,6 +64,10 @@ local function actionPin(action: String, sourceFile: String, count: Int): Site =
 }
 
 tools: Mapping<String, Tool> = new {
+  ["actionlint"] = new {
+    resolver = "mise"
+    sites = new { templateMisePin("actionlint") }
+  }
   ["action-gh-release"] = new {
     resolver = "github-action"
     resolverName = "softprops/action-gh-release"
@@ -126,6 +136,10 @@ tools: Mapping<String, Tool> = new {
     resolver = "mise"
     sites = new { misePin("python") }
   }
+  ["shellcheck"] = new {
+    resolver = "mise"
+    sites = new { templateMisePin("shellcheck") }
+  }
   ["setup-uv"] = new {
     resolver = "github-action"
     resolverName = "astral-sh/setup-uv"
@@ -134,8 +148,17 @@ tools: Mapping<String, Tool> = new {
       actionPin("astral-sh/setup-uv", rootFreshnessYml, 1)
     }
   }
+  ["typos"] = new {
+    resolver = "mise"
+    sites = new { templateMisePin("typos") }
+  }
   ["uv"] = new {
     resolver = "mise"
     sites = new { misePin("uv") }
+  }
+  ["yamllint"] = new {
+    resolver = "mise"
+    resolverName = "pipx:yamllint"
+    sites = new { templateMisePin("\"pipx:yamllint\"") }
   }
 }

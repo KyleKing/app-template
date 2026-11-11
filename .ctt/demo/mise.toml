@@ -1,8 +1,12 @@
 [tools]
+actionlint = "1.7.12"
 hk = "2.12.0"
 node = "26"
+"pipx:yamllint" = "1.38.0"
 pkl = "latest"
 pnpm = "12"
+shellcheck = "0.11.0"
+typos = "1.52.1"
 
 [tasks.build]
 description = "Build generated code"

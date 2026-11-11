@@ -1,30 +1,117 @@
-amends "package://github.com/jdx/hk/releases/download/v2.12.0/hk@2.12.0#/Config.pkl"
+// Install with `hk install --mise` to ensure local tools are available
+// Skip with `HK=0` or `git ... --no-verify`
+//
+// `amends`/`import` must come first and cannot interpolate a pkl `local`, so the
+// hk version is a repeated literal. Patch every copy and the mise pin together.
 
-steps {
-    ["bench"] {
-        glob = "*_bench.ts"
-        check = "pnpm bench"
-    }
+amends "package://github.com/jdx/hk/releases/download/v2.12.0/hk@2.12.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v2.12.0/hk@2.12.0#/Builtins.pkl"
+
+min_hk_version = "2.12.0"
+
+// Generated output and lockfiles are not hand-edited, so no step reads them
+exclude = List("**/node_modules/**", "pnpm-lock.yaml", "public/**/*.min.css", "public/htmx.min.js", "public/shared/**")
+
+// Builtins carry a `check_diff`, so a clean file is never rewritten and hk
+// stages exactly the files each step touched (`stage = "<JOB_FILES>"` default).
+local linters = new Mapping<String, Step> {
+    ["actionlint"] = Builtins.actionlint
     ["biome"] {
-        glob = "*.ts"
+        glob = List("**/*.ts")
         check = "pnpm biome check {{files}}"
         fix = "pnpm biome check --write {{files}}"
     }
-    ["check"] {
-        glob = "*.ts"
-        check = "pnpm check"
+    ["byte-order-marker"] = Builtins.byte_order_marker
+    ["check-added-large-files"] = Builtins.check_added_large_files
+    ["check-executables-have-shebangs"] = Builtins.check_executables_have_shebangs
+    ["check-merge-conflict"] = Builtins.check_merge_conflict
+    ["check-symlinks"] = Builtins.check_symlinks
+    // The .rej guard. `copier update` writes `<file>.rej` for every hunk that
+    // fails to re-apply, and each one holds a local change that is lost if the
+    // file is committed and forgotten.
+    ["copier-forbidden-files"] {
+        batch = true
+        glob = List("**/*.rej", "**/*.orig")
+        check = """
+            echo "Copier conflict artifacts must not be committed. Review and delete:"
+            for f in {{files}}; do echo "  $f"; done
+            exit 1
+            """
     }
-    ["fmt"] {
+    ["destroyed-symlinks"] = Builtins.destroyed_symlinks
+    ["detect-private-key"] = Builtins.detect_private_key
+    // dprint owns every format it has a plugin for (see dprint.json); Biome's formatter is off
+    ["dprint"] {
         check = "pnpm exec dprint check {{files}}"
         fix = "pnpm exec dprint fmt {{files}}"
     }
+    ["forbid-submodules"] = Builtins.forbid_submodules
+    ["mixed-line-ending"] = Builtins.mixed_line_ending
+    // copier renders .copier-answers.yml with a trailing blank line and rewrites
+    // it on every update, so stripping that line produces a one-line diff after
+    // each `copier update`.
+    ["newlines"] = (Builtins.newlines) {
+        exclude = List("**/.copier-answers.yml")
+    }
+    ["shellcheck"] = (Builtins.shellcheck) {
+        check = "shellcheck --severity=warning {{files}}"
+    }
+    ["trailing-whitespace"] = Builtins.trailing_whitespace
+    ["typos"] = Builtins.typos
+    // The relaxed ruleset is deliberate: it demotes style rules to warnings so
+    // only YAML that fails to parse fails. actionlint validates workflow YAML.
+    ["yamllint"] = (Builtins.yamllint) {
+        check = "yamllint -d relaxed {{files}}"
+        exclude = List(".github/workflows/**", "pnpm-lock.yaml")
+    }
+}
+
+// Whole-project commands. batch = false keeps one commit from spawning duplicate runs.
+local slow_checks = new Mapping<String, Step> {
+    ["bench"] {
+        batch = false
+        glob = List("**/*_bench.ts")
+        check = "pnpm bench"
+    }
     ["test"] {
-        glob = "*_test.ts"
+        batch = false
+        glob = List("**/*.ts")
         check = "pnpm test"
     }
     ["test:e2e"] {
-        glob = "*.ts"
+        batch = false
+        glob = List("**/*.ts", "**/*.vto", "**/*.css")
         check = "pnpm test:e2e --project=chrome"
-        // profiles = "slow")
+    }
+    ["tsc"] {
+        batch = false
+        glob = List("**/*.ts")
+        check = "pnpm check"
+    }
+}
+
+hooks = new {
+    ["pre-commit"] {
+        fix = true
+        stash = "patch-file"
+        steps = linters
+    }
+    ["pre-push"] {
+        steps = new {
+            ...slow_checks
+            ...linters
+        }
+    }
+
+    // "fix" and "check" back the `hk fix` and `hk check` commands
+    ["fix"] {
+        fix = true
+        steps = linters
+    }
+    ["check"] {
+        steps = new {
+            ...slow_checks
+            ...linters
+        }
     }
 }
