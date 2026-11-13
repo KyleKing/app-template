@@ -6,6 +6,7 @@ _answers_file: .copier-answers.yml
 _subdirectory: app_template
 _skip_if_exists:
   - README.md
+  - .doneram.pkl
   - src/routes.ts
   - src/templates/pages/home.vto
   - src/templates/partials/nav.vto

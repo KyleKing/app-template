@@ -5,51 +5,29 @@
 //
 // A site that matches a different number of times than `expect` fails the run.
 // A pattern that silently stops matching is how a pin goes stale unnoticed.
-//
-// The schema is inlined so this file evaluates today. It amends doneram's
-// published Config.pkl once doneram ships a pkl package.
 
-class Site {
-  /// Repo-relative path to the file holding the literal.
-  file: String
-  /// Regex with exactly one capture group around the version.
-  pattern: String
-  expect: Int(this > 0) = 1
-}
-
-/// Keeps taking updates below `max`, so a known break blocks only the majors
-/// past it rather than freezing the pin.
-class Hold {
-  reason: String
-  max: String?
-}
-
-class Tool {
-  resolver: String = "mise"
-  /// Name to query when it differs from the map key, e.g. "pipx:commitizen".
-  resolverName: String?
-  sites: Listing<Site>
-  hold: Hold?
-}
+amends "package://github.com/kyleking/doneram/releases/download/v0.6.0/doneram@0.6.0#/Config.pkl"
+import "package://github.com/kyleking/doneram/releases/download/v0.6.0/doneram@0.6.0#/Config.pkl"
 
 /// Brings the rendered .ctt output back in sync after any patch.
-afterPatch: String = "mise run ctt"
+afterPatch = "mise run ctt"
 
 local copierYml = "copier.yml"
 local ciYml = "app_template/.github/workflows/ci.yml.jinja"
 local rootCiYml = ".github/workflows/ci.yml"
 local rootBumpYml = ".github/workflows/bump_version.yml"
 local rootFreshnessYml = ".github/workflows/freshness.yml"
+local pkgFreshnessYml = "app_template/.github/workflows/freshness.yml"
 local miseToml = "mise.toml"
 
 /// A mise tool pin in this repo's own dev environment.
-local function misePin(key: String): Site = new {
+local function misePin(key: String): Config.Site = new {
   file = miseToml
   pattern = #"\#(key) = "([\d.]+)""#
 }
 
 /// A mise tool pin in the template's generated `mise.toml`.
-local function templateMisePin(key: String): Site = new {
+local function templateMisePin(key: String): Config.Site = new {
   file = "app_template/mise.toml.jinja"
   pattern = #"\#(key) = "([\d.]+)""#
 }
@@ -57,13 +35,13 @@ local function templateMisePin(key: String): Site = new {
 /// A `uses: owner/repo@<sha> # <tag>` GitHub Action pin, one capture group
 /// spanning the sha and the tag together, since github-action patches both
 /// as a single resolved value.
-local function actionPin(action: String, sourceFile: String, count: Int): Site = new {
+local function actionPin(action: String, sourceFile: String, count: Int): Config.Site = new {
   file = sourceFile
   pattern = #"\#(action)@([0-9a-f]{40} # v[\d.]+)"#
   expect = count
 }
 
-tools: Mapping<String, Tool> = new {
+tools = new {
   ["actionlint"] = new {
     resolver = "mise"
     sites = new { templateMisePin("actionlint") }
@@ -81,28 +59,46 @@ tools: Mapping<String, Tool> = new {
       actionPin("actions/checkout", rootCiYml, 2)
       actionPin("actions/checkout", rootBumpYml, 1)
       actionPin("actions/checkout", rootFreshnessYml, 1)
+      actionPin("actions/checkout", pkgFreshnessYml, 1)
     }
   }
   ["create-github-app-token"] = new {
     resolver = "github-action"
     resolverName = "actions/create-github-app-token"
-    sites = new { actionPin("actions/create-github-app-token", rootFreshnessYml, 1) }
+    sites = new { actionPin("actions/create-github-app-token", rootFreshnessYml, 1)
+      actionPin("actions/create-github-app-token", pkgFreshnessYml, 1) }
   }
   ["create-pull-request"] = new {
     resolver = "github-action"
     resolverName = "peter-evans/create-pull-request"
-    sites = new { actionPin("peter-evans/create-pull-request", rootFreshnessYml, 1) }
+    sites = new { actionPin("peter-evans/create-pull-request", rootFreshnessYml, 1)
+      actionPin("peter-evans/create-pull-request", pkgFreshnessYml, 1) }
   }
   ["doneram"] = new {
     resolver = "github-action"
     resolverName = "kyleking/doneram"
-    sites = new { actionPin("kyleking/doneram", rootFreshnessYml, 1) }
+    sites = new { actionPin("kyleking/doneram", rootFreshnessYml, 1)
+      actionPin("kyleking/doneram", pkgFreshnessYml, 1) }
+  }
+  ["doneram-schema"] = new {
+    resolver = "github-release"
+    resolverName = "kyleking/doneram"
+    sites = new {
+      new Config.Site {
+        file = ".doneram.pkl"
+        pattern = #"releases/download/v([\d.]+)/doneram"#
+      }
+      new Config.Site {
+        file = ".doneram.pkl"
+        pattern = #"doneram@([\d.]+)#/Config\.pkl"#
+      }
+    }
   }
   ["doneram-version"] = new {
     resolver = "github-release"
     resolverName = "kyleking/doneram"
     sites = new {
-      new Site {
+      new Config.Site {
         file = rootFreshnessYml
         pattern = #"version: v([\d.]+)"#
       }
@@ -113,7 +109,7 @@ tools: Mapping<String, Tool> = new {
     // default is the only literal. expect = 1 fails the run if copier.yml ever
     // grows a second bare numeric default for this to confuse itself with.
     sites = new {
-      new Site {
+      new Config.Site {
         file = copierYml
         pattern = #"^  default: "([\d.]+)""#
       }
@@ -126,6 +122,7 @@ tools: Mapping<String, Tool> = new {
       actionPin("jdx/mise-action", ciYml, 1)
       actionPin("jdx/mise-action", rootCiYml, 1)
       actionPin("jdx/mise-action", rootFreshnessYml, 1)
+      actionPin("jdx/mise-action", pkgFreshnessYml, 1)
     }
   }
   ["pkl"] = new {
