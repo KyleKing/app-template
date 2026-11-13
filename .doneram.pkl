@@ -6,8 +6,8 @@
 // A site that matches a different number of times than `expect` fails the run.
 // A pattern that silently stops matching is how a pin goes stale unnoticed.
 
-amends "package://github.com/kyleking/doneram/releases/download/v0.6.0/doneram@0.6.0#/Config.pkl"
-import "package://github.com/kyleking/doneram/releases/download/v0.6.0/doneram@0.6.0#/Config.pkl"
+amends "package://github.com/kyleking/doneram/releases/download/v0.6.1/doneram@0.6.1#/Config.pkl"
+import "package://github.com/kyleking/doneram/releases/download/v0.6.1/doneram@0.6.1#/Config.pkl"
 
 /// Brings the rendered .ctt output back in sync after any patch.
 afterPatch = "mise run ctt"
